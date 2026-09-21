@@ -1,0 +1,14 @@
+# Servidor web. Traz o Jinja2 (templates) e o Werkzeug (hash de senha).
+Flask>=3.1,<4.0
+
+# Base de fusos horários. O Python não a embute no Windows nem em imagens
+# enxutas de Linux, e sem ela o sistema cairia na hora do servidor — o que
+# desloca "hoje" e quebra os filtros de período.
+tzdata>=2024.1
+
+# Interface de terminal (modo CLI): telas, tabelas, formularios e mouse no
+# terminal. Traz o Rich junto.
+textual>=8.2,<9.0
+
+# Testes automatizados.
+pytest>=8.0

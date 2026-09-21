@@ -1,33 +1,31 @@
-# Ambiente virtual do Python
 venv/
 .venv/
 env/
-
-# Arquivos gerados automaticamente pelo Python
 __pycache__/
 *.py[cod]
 *$py.class
 .pytest_cache/
 
-# Configurações locais de editor e IDE
 .vscode/
 .idea/
 *.code-workspace
 
-# Arquivos do sistema operacional
 Thumbs.db
 Desktop.ini
 .DS_Store
 
-# Arquivos temporários do Office (abertos no Word/PowerPoint)
 ~$*.docx
 ~$*.pptx
 ~$*.xlsx
 
-# Dados reais do sistema — a Etapa 2 versiona apenas arquivos de exemplo
 implementacao/dados/*.json
 !implementacao/dados/*.exemplo.json
-
-# Segredos e configuração local
+*.bak
 .env
 *.local
+
+# transcript/
+# PROMPT_MODO_CLI.md
+# commit_steps.json
+# repo_tree.txt
+# .claude/
