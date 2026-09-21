@@ -35,7 +35,7 @@ Uma aplicação web local: o programa será escrito em Python, subirá um servid
 | Etapa | Pasta | Situação |
 |---|---|---|
 | **1 — Planejamento lógico** | `especificacao/` | 🟢 Pronta |
-| **2 — Implementação em Python** | `implementacao/` | ⬜ Não iniciada |
+| **2 — Implementação em Python** | `implementacao/` | 🟡 Em andamento |
 | **3 — Empacotamento em Docker** | `docker/` | ⬜ Não iniciada |
 
 A entrega da Etapa 1 será um aquivo PDF/docx contendo os três links — Google Docs, Google Apresentações e YouTube.
