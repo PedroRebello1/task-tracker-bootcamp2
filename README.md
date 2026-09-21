@@ -71,16 +71,8 @@ O `src/` será dividido por **responsabilidade**, não por tipo de arquivo. A de
 - **pytest 8.x** — testes automatizados
 - **Persistência em JSON** — legível a olho nu, nativo do Python e adequado como volume do Docker
 
-## Apresentação em vídeo
-
-🔗 *link*
-
 ---
 
 ## Licença
 
-Este repositório utiliza licenciamento múltiplo a depender do componente:
-
-- **Código-Fonte em Python** (`/implementacao`): Licenciado sob a [GNU General Public License v3.0 (GPLv3)](LICENSE).
-- **Configurações Docker** (`/docker`): Licenciadas sob a [Licença MIT](docker/LICENSE).
-- **Documentação e Especificações** (`/especificacao`): Licenciadas sob a [Creative Commons Atribuição 4.0 Internacional (CC BY 4.0)](especificacao/LICENSE).
+Este repositório está licenciado sob a [GNU General Public License v3.0 (GPLv3)](LICENSE).
