@@ -1,0 +1,26 @@
+[
+  {
+    "id": 1,
+    "nome": "Administrador",
+    "login": "admin@tasktracker.local",
+    "senha": "scrypt:32768:8:1$QNLh1Xz1kVTvCvVu$1e6e2b7f4775bdbb298f42db04ed0d2bf5ab3e1af562d6983f689eab896cd0a66dcd9a11a7c84a01c72a5c9bfe13b63b42855194cf4dd939a2d1ddc6ee2a0ede",
+    "perfil": "admin",
+    "tema": "claro"
+  },
+  {
+    "id": 2,
+    "nome": "Pedro Rebello",
+    "login": "pedro@exemplo.local",
+    "senha": "scrypt:32768:8:1$oQVsPfjIvKzngmkz$7055ce3b8c94fb0ca40b42f3cf2f8dcc82d9a5d2074abf061a6bc424795f2ca2067a6af7dd1a0fea47818131805991f7f4e0e6c3443e9f32d441cea159601937",
+    "perfil": "comum",
+    "tema": "escuro"
+  },
+  {
+    "id": 3,
+    "nome": "Ana Martins",
+    "login": "ana@exemplo.local",
+    "senha": "scrypt:32768:8:1$VIE8c9plVrl23GXJ$804591ec8a05b1ccf49cf232e6d4aa5ba710c1a6419d4a4cd1d9bf2f1a450f998e2de4f0b0cc170d7797bf668f0167133d2e47f222e8cc5d2cbb095c78ebbd6f",
+    "perfil": "comum",
+    "tema": "claro"
+  }
+]
