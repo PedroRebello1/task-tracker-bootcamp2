@@ -1,0 +1,91 @@
+<!doctype html>
+{# O tema sai resolvido do servidor, aqui no <html>: decidido por JavaScript,
+   a página piscaria clara antes de escurecer. #}
+<html lang="pt-BR" data-theme="{{ tema }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="{{ 'dark' if tema == 'escuro' else 'light' }}">
+  <meta name="description" content="Task Tracker — tarefas pessoais organizadas por prazo e prioridade.">
+  <title>{% block titulo %}Task Tracker{% endblock %}</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='estilo.css') }}?v={{ versao_css }}">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><text y='14' font-size='14'>✓</text></svg>">
+</head>
+<body>
+
+<a class="pular" href="#conteudo">Pular para o conteúdo</a>
+
+{% macro alternar_tema() -%}
+  <form method="post" action="{{ url_for('alternar_tema') }}" class="form-tema">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+    <input type="hidden" name="voltar_para" value="{{ caminho_atual }}">
+    <button class="tema" type="submit"
+            title="{{ 'Usar o tema claro' if tema == 'escuro' else 'Usar o tema escuro' }}"
+            aria-label="{{ 'Usar o tema claro' if tema == 'escuro' else 'Usar o tema escuro' }}">
+      <span aria-hidden="true">{{ '☀' if tema == 'escuro' else '☾' }}</span>
+    </button>
+  </form>
+{%- endmacro %}
+
+{% if usuario %}
+<header class="topo">
+  <div class="faixa">
+    <a class="marca" href="{{ url_for('painel') }}">
+      <span class="marca-sinal" aria-hidden="true">✓</span>Task&nbsp;Tracker
+    </a>
+
+    <nav class="menu" aria-label="Seções">
+      <a href="{{ url_for('painel', **filtros_pessoais) }}"
+         {% if request.endpoint == 'painel' %}aria-current="page"{% endif %}>Painel</a>
+      <a href="{{ url_for('relatorio', **filtros_atuais) }}"
+         {% if request.endpoint == 'relatorio' %}aria-current="page"{% endif %}>Relatório</a>
+      {% if usuario.eh_admin %}
+        <a href="{{ url_for('visao_admin') }}"
+           {% if request.endpoint == 'visao_admin' %}aria-current="page"{% endif %}>Administração</a>
+      {% endif %}
+    </nav>
+
+    <div class="conta">
+      {{ alternar_tema() }}
+      <span class="quem">
+        <span class="inicial" aria-hidden="true">{{ usuario.nome[:1]|upper }}</span>
+        <span class="nome">{{ usuario.nome }}</span>
+        {% if usuario.eh_admin %}<span class="selo">admin</span>{% endif %}
+      </span>
+      {# Sair altera estado, então é POST — um GET pode ser disparado por terceiros. #}
+      <form method="post" action="{{ url_for('sair') }}" class="form-sair">
+        <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+        <button class="sair" type="submit">Sair</button>
+      </form>
+    </div>
+  </div>
+</header>
+{% endif %}
+
+<main id="conteudo" class="pagina{% if not usuario %} pagina-estreita{% endif %}">
+
+  {% with mensagens = get_flashed_messages(with_categories=true) %}
+    {% if mensagens %}
+      <div class="avisos">
+        {% for categoria, texto in mensagens %}
+          <p class="aviso aviso-{{ categoria }}"
+             role="{{ 'alert' if categoria == 'erro' else 'status' }}">
+            <span class="aviso-sinal" aria-hidden="true">{{ '!' if categoria == 'erro' else '✓' }}</span>
+            <span>{{ texto }}</span>
+          </p>
+        {% endfor %}
+      </div>
+    {% endif %}
+  {% endwith %}
+
+  {% block conteudo %}{% endblock %}
+</main>
+
+<footer class="rodape">
+  {# Sem barra de navegação para o visitante, o botão de tema mora aqui. #}
+  {% if not usuario %}<div class="tema-rodape">{{ alternar_tema() }}</div>{% endif %}
+  <span>Task Tracker · Bootcamp II · Pedro Rebello</span>
+</footer>
+
+</body>
+</html>
