@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Painel — Task Tracker{% endblock %}
+
+{% block conteudo %}
+{% set alvo = 'painel' %}
+<div class="cabecalho-secao">
+  <div>
+    <h1>Minhas tarefas</h1>
+    <p class="subtitulo">{{ hoje.strftime('%d/%m/%Y') }} · {{ resumo.total }}
+      {{ 'tarefa' if resumo.total == 1 else 'tarefas' }} neste recorte</p>
+  </div>
+  <a class="botao botao-primario" href="{{ url_for('nova_tarefa', voltar_para=caminho_atual) }}">
+    <span aria-hidden="true">+</span> Nova tarefa
+  </a>
+</div>
+
+{% include "_resumo.html" with context %}
+{% include "_filtros.html" with context %}
+
+{% if not tarefas %}
+  {# Passo 2.6 #}
+  <div class="vazio">
+    <p class="vazio-sinal" aria-hidden="true">◦</p>
+    {% if filtros.busca %}
+      <p>Nenhuma tarefa com “{{ filtros.busca }}” no título dentro deste recorte.</p>
+      <a class="botao" href="{{ link('painel', busca=None) }}">Limpar a busca</a>
+    {% else %}
+      <p>Nenhuma tarefa encontrada para este período.</p>
+      <a class="botao botao-primario" href="{{ url_for('nova_tarefa') }}">Criar a primeira tarefa</a>
+    {% endif %}
+  </div>
+{% else %}
+  {% set mostrar_dono = false %}
+  {% include "_tabela.html" with context %}
+{% endif %}
+{% endblock %}

@@ -1,0 +1,23 @@
+{# Faixa de resumo do Passo 2.7. Os quatro números decompõem o período inteiro
+   (a situação escolhida filtra a tabela abaixo, não a contagem) e cada um é um
+   atalho: ver "3 atrasadas" e não conseguir clicar nelas seria uma frustração
+   gratuita. `alvo_resumo` existe porque, no relatório, o clique leva ao painel. #}
+{% set alvo_resumo = alvo_resumo | default(alvo, true) %}
+<div class="resumo{% if grande %} resumo-grande{% endif %}">
+  <a class="numero {% if filtros.situacao == 'todas' %}ativo{% endif %}"
+     href="{{ link(alvo_resumo, situacao='todas') }}">
+    <strong>{{ resumo.total }}</strong><span>no período</span>
+  </a>
+  <a class="numero {% if filtros.situacao == 'pendentes' %}ativo{% endif %}"
+     href="{{ link(alvo_resumo, situacao='pendentes') }}">
+    <strong>{{ resumo.pendentes }}</strong><span>pendentes</span>
+  </a>
+  <a class="numero feito {% if filtros.situacao == 'concluidas' %}ativo{% endif %}"
+     href="{{ link(alvo_resumo, situacao='concluidas') }}">
+    <strong>{{ resumo.concluidas }}</strong><span>concluídas</span>
+  </a>
+  <a class="numero {% if resumo.atrasadas %}alerta{% endif %} {% if filtros.situacao == 'atrasadas' %}ativo{% endif %}"
+     href="{{ link(alvo_resumo, situacao='atrasadas') }}">
+    <strong>{{ resumo.atrasadas }}</strong><span>atrasadas</span>
+  </a>
+</div> 

@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% block titulo %}{{ "Nova tarefa" if modo == "nova" else "Editar tarefa" }} — Task Tracker{% endblock %}
+
+{% block conteudo %}
+{% set voltar = request.args.get('voltar_para') or url_for('painel') %}
+
+<div class="cabecalho-secao">
+  <div>
+    <h1>{{ "Nova tarefa" if modo == "nova" else "Editar tarefa #%s"|format(tarefa.id) }}</h1>
+    {% if modo == 'editar' and tarefa.data_criacao %}
+      <p class="subtitulo">Criada em {{ tarefa.data_criacao.strftime('%d/%m/%Y às %H:%M') }}</p>
+    {% endif %}
+  </div>
+</div>
+ 
+<form method="post" class="formulario formulario-largo">
+  <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+
+  <label for="titulo">Título <span class="obrigatorio" aria-hidden="true">*</span></label>
+  <input type="text" id="titulo" name="titulo" value="{{ valores.titulo }}"
+         maxlength="60" required autofocus
+         placeholder="Estudar para a prova de Bootcamp II"
+         aria-describedby="ajuda-titulo">
+  <p class="ajuda" id="ajuda-titulo">Até 60 caracteres.</p>
+
+  <label for="descricao">Descrição</label>
+  <textarea id="descricao" name="descricao" rows="3" maxlength="300"
+            placeholder="Opcional — o que precisa ser feito, em uma frase"
+            aria-describedby="ajuda-descricao">{{ valores.descricao }}</textarea>
+  <p class="ajuda" id="ajuda-descricao">Opcional, até 300 caracteres.</p>
+
+  <div class="linha">
+    <div class="campo">
+      {# RN02 — o seletor de calendário já nasce limitado; o servidor confere de novo. #}
+      <label for="data_prevista">Data prevista <span class="obrigatorio" aria-hidden="true">*</span></label>
+      {% set data_minima = tarefa.data_prevista if modo == 'editar' and tarefa.data_prevista < hoje else hoje %}
+      <input type="date" id="data_prevista" name="data_prevista"
+             value="{{ valores.texto_data }}" min="{{ data_minima.isoformat() }}"
+             required aria-describedby="ajuda-data">
+      <p class="ajuda" id="ajuda-data">
+        {% if data_minima < hoje %}
+          Esta tarefa já venceu. Você pode manter
+          {{ data_minima.strftime('%d/%m/%Y') }} ou escolher uma data de hoje em diante.
+        {% else %}
+          Não é possível escolher uma data anterior a hoje.
+        {% endif %}
+      </p>
+    </div>
+
+    <div class="campo">
+      {# RN03 — lista fechada, nunca texto livre. #}
+      <label for="prioridade">Prioridade <span class="obrigatorio" aria-hidden="true">*</span></label>
+      <select id="prioridade" name="prioridade" required>
+        {% for opcao in PRIORIDADES %}
+          <option value="{{ opcao }}" {% if valores.prioridade == opcao %}selected{% endif %}>{{ opcao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div class="campo">
+      <label for="categoria">Categoria</label>
+      <select id="categoria" name="categoria">
+        {% for opcao in CATEGORIAS %}
+          <option value="{{ opcao }}" {% if valores.categoria == opcao %}selected{% endif %}>{{ opcao }}</option>
+        {% endfor %}
+      </select>
+    </div>
+  </div>
+
+  <div class="acoes-formulario">
+    <button class="botao botao-primario" type="submit">
+      {{ "Criar tarefa" if modo == "nova" else "Salvar alterações" }}
+    </button>
+    <a class="botao" href="{{ voltar }}">Cancelar</a>
+  </div>
+</form>
+{% endblock %}

@@ -1,0 +1,74 @@
+{# Listagem de tarefas, compartilhada pelo painel e pela visão administrativa.
+   `mostrar_dono` liga a coluna do Passo 9.3.
+   Cada célula carrega data-rotulo: é o que permite à folha de estilo virar
+   cartões no celular sem uma linha de JavaScript. #}
+<div class="rolagem">
+<table class="tabela">
+  <caption class="oculto">Tarefas do período selecionado</caption>
+  <thead>
+    <tr>
+      <th scope="col">ID</th>
+      {% if mostrar_dono %}<th scope="col">Dono</th>{% endif %}
+      <th scope="col">Título</th>
+      <th scope="col">Prioridade</th>
+      <th scope="col">Categoria</th>
+      <th scope="col">Data prevista</th>
+      <th scope="col">Status</th>
+      <th scope="col" class="acoes">Ações</th>
+    </tr>
+  </thead> 
+  <tbody>
+    {% for tarefa in tarefas %}
+    <tr class="{% if tarefa.concluida %}feita{% elif tarefa.atrasada %}atrasada{% endif %} prio-{{ tarefa.prioridade|lower|replace('é','e') }}">
+      <td class="id" data-rotulo="ID">#{{ tarefa.id }}</td>
+
+      {% if mostrar_dono %}
+        <td class="dono" data-rotulo="Dono">{{ donos.get(tarefa.usuario_id, '—') }}</td>
+      {% endif %}
+
+      <td class="celula-titulo" data-rotulo="Título">
+        <span class="titulo">{{ tarefa.titulo }}</span>
+        {% if tarefa.descricao %}<span class="descricao">{{ tarefa.descricao }}</span>{% endif %}
+      </td>
+
+      <td data-rotulo="Prioridade">
+        <span class="etiqueta p-{{ tarefa.prioridade|lower|replace('é','e') }}">{{ tarefa.prioridade }}</span>
+      </td>
+
+      <td class="discreto" data-rotulo="Categoria">{{ tarefa.categoria }}</td>
+
+      <td class="data" data-rotulo="Data prevista">
+        <time datetime="{{ tarefa.data_prevista.isoformat() }}">{{ tarefa.data_prevista.strftime('%d/%m/%Y') }}</time>
+        {% if tarefa.atrasada %}<span class="marca-atraso">atrasada</span>{% endif %}
+      </td>
+
+      <td data-rotulo="Status">
+        <span class="etiqueta s-{{ 'concluida' if tarefa.concluida else 'pendente' }}">{{ tarefa.status }}</span>
+        {# O histórico só serve para alguma coisa se aparecer na tela. #}
+        {% if tarefa.data_conclusao %}
+          <span class="carimbo">em {{ tarefa.data_conclusao.strftime('%d/%m/%Y às %H:%M') }}</span>
+        {% endif %}
+      </td>
+
+      <td class="acoes" data-rotulo="Ações">
+        {% if tarefa.concluida %}
+          <form method="post" action="{{ url_for('reabrir_tarefa', id_tarefa=tarefa.id) }}">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <input type="hidden" name="voltar_para" value="{{ caminho_atual }}">
+            <button class="acao" type="submit">Reabrir</button>
+          </form>
+        {% else %}
+          <form method="post" action="{{ url_for('concluir_tarefa', id_tarefa=tarefa.id) }}">
+            <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+            <input type="hidden" name="voltar_para" value="{{ caminho_atual }}">
+            <button class="acao acao-ok" type="submit">Concluir</button>
+          </form>
+          <a class="acao" href="{{ url_for('editar_tarefa', id_tarefa=tarefa.id, voltar_para=caminho_atual) }}">Editar</a>
+        {% endif %}
+        <a class="acao acao-perigo" href="{{ url_for('excluir_tarefa', id_tarefa=tarefa.id, voltar_para=caminho_atual) }}">Excluir</a>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+</div>

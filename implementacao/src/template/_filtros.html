@@ -1,0 +1,44 @@
+{# Filtros da listagem. `alvo` é o endpoint da tela que está incluindo isto.
+   Período vem do Passo 7 da Etapa 1; situação é um acréscimo da Etapa 2. #}
+<div class="filtros">
+
+  <div class="grupo-filtro">
+    <span class="rotulo-filtro" id="rotulo-periodo">Período</span>
+    <div class="segmentos" role="group" aria-labelledby="rotulo-periodo">
+      {% for chave, rotulo in PERIODOS %}
+        <a class="segmento {% if filtros.periodo == chave %}ativo{% endif %}"
+           href="{{ link(alvo, periodo=chave) }}"
+           {% if filtros.periodo == chave %}aria-current="true"{% endif %}>{{ rotulo }}</a>
+      {% endfor %}
+    </div>
+  </div>
+ 
+{% if alvo != 'relatorio' %}
+  <div class="grupo-filtro">
+    <span class="rotulo-filtro" id="rotulo-situacao">Situação</span>
+    <div class="segmentos" role="group" aria-labelledby="rotulo-situacao">
+      {% for chave, rotulo in SITUACOES %}
+        <a class="segmento {% if filtros.situacao == chave %}ativo{% endif %}"
+           href="{{ link(alvo, situacao=chave) }}"
+           {% if filtros.situacao == chave %}aria-current="true"{% endif %}>{{ rotulo }}</a>
+      {% endfor %}
+    </div>
+  </div>
+{% endif %}
+
+  <form class="busca" method="get" action="{{ url_for(alvo) }}" role="search">
+    <input type="hidden" name="periodo" value="{{ filtros.periodo }}">
+    {% if alvo != 'relatorio' %}<input type="hidden" name="situacao" value="{{ filtros.situacao }}">{% endif %}
+    {% if alvo == 'relatorio' and visao_admin %}<input type="hidden" name="admin" value="1">{% endif %}
+    <label class="oculto" for="busca">Buscar no título</label>
+    <div class="campo-busca">
+      <span class="lupa" aria-hidden="true">⌕</span>
+      <input type="search" id="busca" name="busca" value="{{ filtros.busca }}"
+             placeholder="Buscar no título…" autocomplete="off">
+    </div>
+    <button class="botao botao-discreto" type="submit">Buscar</button>
+    {% if filtros.busca %}
+      <a class="limpar" href="{{ link(alvo, busca=None) }}">Limpar</a>
+    {% endif %}
+  </form>
+</div>
