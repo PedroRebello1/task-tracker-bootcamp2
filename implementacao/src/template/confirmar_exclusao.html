@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block titulo %}Excluir tarefa — Task Tracker{% endblock %}
+
+{% block conteudo %}
+{# RN06 — nenhuma tarefa é removida no primeiro clique. #}
+{% set voltar = request.args.get('voltar_para') or url_for('painel') %}
+
+<div class="cartao cartao-perigo">
+  <p class="sobrenome perigo">Confirmação necessária</p>
+  <h1 class="titulo-entrada">Excluir tarefa</h1>
+
+  <p class="pergunta">
+    Excluir a tarefa <strong>“{{ tarefa.titulo }}”</strong>,
+    prevista para <strong>{{ tarefa.data_prevista.strftime('%d/%m/%Y') }}</strong>?
+  </p> 
+
+  <dl class="detalhe">
+    <div><dt>Identificador</dt><dd>#{{ tarefa.id }}</dd></div>
+    <div><dt>Prioridade</dt><dd>{{ tarefa.prioridade }}</dd></div>
+    <div><dt>Categoria</dt><dd>{{ tarefa.categoria }}</dd></div>
+    <div><dt>Status</dt><dd>{{ tarefa.status }}</dd></div>
+    <div><dt>Criada em</dt><dd>{{ tarefa.data_criacao.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
+    {% if tarefa.data_conclusao %}
+      <div><dt>Concluída em</dt><dd>{{ tarefa.data_conclusao.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
+    {% endif %}
+  </dl>
+
+  {% if tarefa.descricao %}
+    <p class="descricao-longa">{{ tarefa.descricao }}</p>
+  {% endif %}
+
+  <p class="alerta-texto">Esta ação não pode ser desfeita.</p>
+
+  <div class="acoes-formulario">
+    <form method="post">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="voltar_para" value="{{ voltar }}">
+      <button class="botao botao-perigo" type="submit">Sim, excluir</button>
+    </form>
+    <a class="botao" href="{{ voltar }}">Cancelar</a>
+  </div>
+</div>
+{% endblock %}

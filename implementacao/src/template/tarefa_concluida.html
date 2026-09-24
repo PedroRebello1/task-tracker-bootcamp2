@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block titulo %}Tarefa concluída — Task Tracker{% endblock %}
+
+{% block conteudo %}
+{# RN04 / Passo 4.4 — o formulário não abre; a tela oferece o botão Reabrir. #}
+{% set voltar = request.args.get('voltar_para') or url_for('painel') %}
+
+<div class="cartao">
+  <p class="sobrenome">Regra RN04</p>
+  <h1 class="titulo-entrada">Esta tarefa está concluída</h1>
+  <p class="apoio">
+    Reabra-a para poder editar. Uma conclusão registrada não é reescrita por
+    acidente — é isso que mantém o histórico confiável.
+  </p> 
+
+  <dl class="detalhe">
+    <div><dt>Tarefa</dt><dd>#{{ tarefa.id }} — {{ tarefa.titulo }}</dd></div>
+    <div><dt>Prevista para</dt><dd>{{ tarefa.data_prevista.strftime('%d/%m/%Y') }}</dd></div>
+    <div><dt>Criada em</dt><dd>{{ tarefa.data_criacao.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
+    {% if tarefa.data_conclusao %}
+      <div><dt>Concluída em</dt><dd>{{ tarefa.data_conclusao.strftime('%d/%m/%Y às %H:%M') }}</dd></div>
+    {% endif %}
+  </dl>
+
+  <div class="acoes-formulario">
+    <form method="post" action="{{ url_for('reabrir_tarefa', id_tarefa=tarefa.id) }}">
+      <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+      <input type="hidden" name="voltar_para"
+             value="{{ url_for('editar_tarefa', id_tarefa=tarefa.id, voltar_para=voltar) }}">
+      <button class="botao botao-primario" type="submit">Reabrir e editar</button>
+    </form>
+    <a class="botao" href="{{ voltar }}">Voltar</a>
+  </div>
+</div>
+{% endblock %}
