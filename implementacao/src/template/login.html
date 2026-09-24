@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block titulo %}Entrar — Task Tracker{% endblock %}
+
+{% block conteudo %}
+<div class="cartao">
+  <p class="sobrenome">Bootcamp II · CEUB</p>
+  <h1 class="titulo-entrada">Task Tracker</h1>
+  <p class="apoio">Suas tarefas organizadas por prazo e prioridade.</p>
+
+  <form method="post" class="formulario" id="form-login">
+    <input type="hidden" name="csrf" value="{{ csrf_token() }}">
+
+    <label for="login">E-mail</label>
+    <input type="email" id="login" name="login" value="{{ login_digitado }}"
+           required autofocus autocomplete="username" inputmode="email">
+
+    <label for="senha">Senha</label>
+    <input type="password" id="senha" name="senha" required autocomplete="current-password">
+
+    {# O bloqueio do Passo 1.6 fica visível: recusar em silêncio é pior do que dizer o porquê. #}
+    <button class="botao botao-primario largo" type="submit" id="entrar"
+            {% if bloqueio %}disabled{% endif %}>
+      {% if bloqueio %}Bloqueado por <span id="restante">{{ bloqueio }}</span>s{% else %}Entrar{% endif %}
+    </button>
+  </form>
+
+  <p class="alternativa">
+    Ainda não tem conta? <a href="{{ url_for('cadastro') }}">Criar conta</a>
+  </p>
+</div>
+
+{% if bloqueio %}
+<script>
+  // Conta o bloqueio para trás e devolve o botão sozinho. Sem isto o usuário
+  // precisaria adivinhar quando pode tentar de novo, ou recarregar na tentativa.
+  (function () {
+    var botao = document.getElementById("entrar");
+    var marcador = document.getElementById("restante");
+    var restam = {{ bloqueio }};
+    var relogio = setInterval(function () {
+      restam -= 1;
+      if (restam > 0) { marcador.textContent = restam; return; }
+      clearInterval(relogio);
+      botao.disabled = false;
+      botao.textContent = "Entrar";
+    }, 1000);
+  })();
+</script>
+{% endif %}
+{% endblock %}
