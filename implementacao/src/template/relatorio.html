@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block titulo %}Relatório — Task Tracker{% endblock %}
+
+{% block conteudo %}
+{% set alvo = 'relatorio' %}
+
+<div class="cabecalho-secao">
+  <div>
+    <h1>Relatório</h1>
+    <p class="subtitulo">
+      {% if visao_admin %}Todas as tarefas de todos os usuários{% else %}Suas tarefas{% endif %},
+      no mesmo recorte do painel.
+    </p>
+  </div>
+  <a class="botao" href="{{ link('visao_admin' if visao_admin else 'painel') }}">
+    Voltar {{ 'à administração' if visao_admin else 'ao painel' }}
+  </a>
+</div>
+
+{% include "_filtros.html" with context %}
+
+{% if resumo.vazio %}
+  <div class="vazio">
+    <p class="vazio-sinal" aria-hidden="true">◦</p>
+    <p>Não há dados suficientes para gerar o relatório neste período.</p>
+  </div>
+{% else %}
+  {% set grande = true %}
+  {# Clicar num número aqui leva à listagem correspondente: o relatório informa,
+     o painel é onde se age sobre a tarefa. #}
+  {% set alvo_resumo = 'visao_admin' if visao_admin else 'painel' %}
+  {% include "_resumo.html" with context %}
+
+  <div class="progresso">
+    <div class="progresso-rotulo">
+      <span>Percentual de conclusão</span>
+      <strong>{{ resumo.percentual }}%</strong>
+    </div>
+    <div class="barra" role="img"
+         aria-label="{{ resumo.concluidas }} de {{ resumo.total }} tarefas concluídas, {{ resumo.percentual }} por cento">
+      <div class="preenchida" style="width: {{ resumo.percentual }}%"></div>
+    </div>
+    <p class="ajuda">{{ resumo.concluidas }} de {{ resumo.total }} concluídas.</p>
+  </div>
+
+  <div class="colunas">
+    <section>
+      <h2>Por prioridade</h2>
+      {% for item in resumo.por_prioridade %}
+        <div class="distribuicao">
+          <span class="etiqueta p-{{ item.valor|lower|replace('é','e') }}">{{ item.valor }}</span>
+          <div class="barra"><div class="preenchida p-barra-{{ item.valor|lower|replace('é','e') }}"
+                                  style="width: {{ item.percentual }}%"></div></div>
+          <span class="contagem">{{ item.quantidade }} · {{ item.percentual }}%</span>
+        </div>
+      {% endfor %}
+    </section>
+
+    <section>
+      <h2>Por categoria</h2>
+      {% for item in resumo.por_categoria %}
+        <div class="distribuicao">
+          <span class="etiqueta neutra">{{ item.valor }}</span>
+          <div class="barra"><div class="preenchida" style="width: {{ item.percentual }}%"></div></div>
+          <span class="contagem">{{ item.quantidade }} · {{ item.percentual }}%</span>
+        </div>
+      {% endfor %}
+    </section>
+
+    {# Os títulos que entraram na conta. Sem eles, buscar por palavra no
+       relatório seria fazer uma pergunta e receber só o total de volta. #}
+    <section class="coluna-larga">
+      <h2>
+        {% if filtros.busca %}Tarefas com “{{ filtros.busca }}”{% else %}Tarefas no recorte{% endif %}
+        <span class="contagem-titulo">{{ resumo.total }}</span>
+      </h2>
+      <ul class="lista-titulos">
+        {% for tarefa in tarefas[:limite_lista] %}
+          <li class="item-titulo {% if tarefa.concluida %}feita{% endif %}">
+            <span class="marca-prioridade p-barra-{{ tarefa.prioridade|lower|replace('é','e') }}"
+                  title="Prioridade {{ tarefa.prioridade }}" aria-hidden="true"></span>
+            <span class="nome-tarefa">
+              {{ tarefa.titulo }}
+              {% if visao_admin %}<span class="dono-tarefa">{{ donos.get(tarefa.usuario_id, '—') }}</span>{% endif %}
+            </span>
+            <time class="data-tarefa {% if tarefa.esta_atrasada(hoje) %}vencida{% endif %}"
+                  datetime="{{ tarefa.data_prevista.isoformat() }}">
+              {{ tarefa.data_prevista.strftime('%d/%m') }}
+            </time>
+            <span class="etiqueta s-{{ 'concluida' if tarefa.concluida else 'pendente' }}">
+              {{ 'Feita' if tarefa.concluida else 'Pendente' }}
+            </span>
+          </li>
+        {% endfor %}
+      </ul>
+      {% if resumo.total > limite_lista %}
+        <p class="ajuda">
+          Mostrando as {{ limite_lista }} primeiras.
+          <a href="{{ link('visao_admin' if visao_admin else 'painel') }}">Ver todas no painel</a>.
+        </p>
+      {% endif %}
+    </section>
+  </div>
+{% endif %}
+{% endblock %}

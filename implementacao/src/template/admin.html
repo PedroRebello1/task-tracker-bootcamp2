@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block titulo %}Administração — Task Tracker{% endblock %}
+
+{% block conteudo %}
+{# Passo 9 — só o perfil admin chega até aqui (RN05) #}
+{% set alvo = 'visao_admin' %}
+
+<div class="cabecalho-secao">
+  <div>
+    <h1>Administração</h1>
+    <p class="subtitulo">Todas as tarefas de todos os usuários.</p>
+  </div>
+  <div class="acoes-cabecalho">
+    <a class="botao" href="{{ link('relatorio', admin=1) }}">Relatório desta visão</a>
+    <a class="botao" href="{{ url_for('painel') }}">Meu painel</a>
+  </div>
+</div> 
+
+<p class="nota">
+  As regras <strong>RN04</strong> (tarefa concluída não se edita) e
+  <strong>RN06</strong> (exclusão exige confirmação) continuam valendo aqui.
+</p>
+
+{% include "_resumo.html" with context %}
+{% include "_filtros.html" with context %}
+
+{% if not tarefas %}
+  <div class="vazio">
+    <p class="vazio-sinal" aria-hidden="true">◦</p>
+    <p>Nenhuma tarefa encontrada para este período.</p>
+  </div>
+{% else %}
+  {% set mostrar_dono = true %}
+  {% include "_tabela.html" with context %}
+{% endif %}
+{% endblock %}
