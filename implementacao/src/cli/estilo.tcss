@@ -1,0 +1,288 @@
+/* Folha de estilo do modo terminal - o estilo.css desta interface.
+   As cores vem do tema do Textual ($primary, $error...), entao a mesma folha
+   serve ao tema claro e ao escuro. */
+
+Screen {
+    layout: vertical;
+}
+
+/* boas-vindas */
+#boas-vindas {
+    width: 100%;
+    height: 1fr;
+    align: center middle;
+}
+#banner {
+    width: auto;
+    margin: 0 0 1 0;
+    color: $primary;
+    text-style: bold;
+}
+#boas-vindas > Static {
+    width: auto;
+    margin-left: 2;
+}
+#sobrenome, .sobrenome {
+    color: $text-muted;
+    text-style: bold;
+}
+#apoio, .apoio {
+    color: $text-muted;
+}
+#pergunta {
+    margin-top: 1;
+    text-style: bold;
+}
+#opcoes {
+    height: auto;
+    width: auto;
+    margin: 1 0 0 2;
+}
+#opcoes Button {
+    margin-right: 2;
+    min-width: 30;
+}
+#dica {
+    margin-top: 1;
+    color: $text-muted;
+}
+
+/* cartoes */
+.cartao {
+    width: 64;
+    height: auto;
+    margin: 2 0 0 0;
+    padding: 1 3;
+    border: round $primary;
+    background: $surface;
+    align-horizontal: center;
+}
+Screen.centrada {
+    align: center top;
+}
+.titulo-cartao {
+    text-style: bold;
+    color: $primary;
+    margin-bottom: 1;
+}
+.cartao Label, .formulario Label {
+    margin-top: 1;
+}
+.cartao Input, .formulario Input, .formulario MaskedInput, .formulario Select, .formulario TextArea {
+    width: 100%;
+}
+.acoes {
+    height: auto;
+    width: 100%;
+    margin-top: 1;
+}
+.acoes Button {
+    margin-right: 1;
+}
+.mensagem {
+    color: $error;
+    text-style: bold;
+    height: auto;
+}
+.ajuda {
+    color: $text-muted;
+    height: auto;
+}
+#avisos {
+    width: 64;
+    height: auto;
+    margin-top: 1;
+    padding: 0 1;
+    color: $text-muted;
+    border: round $warning;
+}
+
+/* formulario */
+.formulario {
+    width: 100%;
+    height: 1fr;
+    padding: 1 3;
+}
+.titulo-secao {
+    text-style: bold;
+    color: $primary;
+}
+.subtitulo {
+    color: $text-muted;
+}
+.formulario TextArea {
+    height: 5;
+}
+.formulario .linha {
+    height: auto;
+    width: 100%;
+    margin-top: 1;
+}
+.formulario .campo {
+    width: 1fr;
+    height: auto;
+    margin-right: 2;
+}
+.formulario .campo Label {
+    margin-top: 0;
+}
+
+/* painel */
+#cabecalho {
+    width: 100%;
+    height: auto;
+    padding: 0 2;
+    background: $primary 20%;
+}
+#nota-admin {
+    width: 100%;
+    height: auto;
+    padding: 0 2;
+    color: $text-muted;
+}
+#resumo {
+    height: auto;
+    width: 100%;
+    padding: 0 1;
+}
+.numero {
+    width: 1fr;
+    height: 4;
+    margin: 0 1;
+    padding: 0 1;
+    border: round $panel;
+    content-align: center middle;
+    text-align: center;
+}
+.numero:hover {
+    border: round $primary;
+}
+.numero.ativo {
+    border: round $primary;
+    background: $primary 20%;
+}
+.numero.alerta {
+    color: $error;
+}
+#filtros {
+    height: auto;
+    width: 100%;
+    padding: 0 2;
+}
+.grupo-filtro {
+    width: auto;
+    height: auto;
+    margin-right: 3;
+}
+.grupo-filtro Label {
+    color: $text-muted;
+}
+.grupo-filtro Tabs {
+    height: 3;
+}
+#periodo {
+    width: 30;
+}
+#situacao {
+    width: 46;
+}
+.grupo-busca {
+    width: 1fr;
+    margin-right: 0;
+}
+.grupo-busca Input {
+    width: 100%;
+}
+#tabela {
+    height: 1fr;
+    margin: 0 2;
+}
+#vazio {
+    height: 1fr;
+    margin: 0 2;
+    padding: 1 2;
+    color: $text-muted;
+    content-align: center middle;
+    text-align: center;
+    border: round $panel;
+}
+#detalhe {
+    height: auto;
+    max-height: 4;
+    margin: 0 2;
+    padding: 0 1;
+    color: $text-muted;
+    background: $surface;
+}
+#acoes {
+    height: auto;
+    width: 100%;
+    padding: 0 1;
+}
+#acoes Button {
+    margin: 0 1;
+    min-width: 12;
+}
+
+/* relatorio */
+#conteudo {
+    height: 1fr;
+    padding: 0 2;
+}
+#progresso {
+    height: auto;
+    width: 100%;
+    margin: 1 1;
+}
+#barra-progresso {
+    width: 100%;
+}
+#colunas {
+    height: auto;
+    width: 100%;
+    margin: 0 1;
+}
+.coluna {
+    width: 1fr;
+    height: auto;
+    margin-right: 2;
+}
+#titulo-lista {
+    margin: 1 1 0 1;
+}
+#lista {
+    height: auto;
+    max-height: 14;
+    margin: 0 1;
+}
+
+/* dialogos */
+ModalScreen {
+    align: center middle;
+    background: $background 60%;
+}
+.dialogo {
+    width: 70;
+    height: auto;
+    padding: 1 3;
+    border: thick $primary;
+    background: $surface;
+}
+.dialogo.perigo {
+    border: thick $error;
+}
+.dialogo .pergunta {
+    margin: 1 0;
+}
+.dialogo .detalhe {
+    height: auto;
+}
+.dialogo .descricao-longa {
+    margin-top: 1;
+    color: $text-muted;
+}
+.dialogo .alerta-texto {
+    margin-top: 1;
+    color: $error;
+    text-style: bold;
+}
