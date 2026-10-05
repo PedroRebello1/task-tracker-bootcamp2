@@ -42,13 +42,15 @@ CRIAR_CONTA = "nova"
 class MenuNumerado:
     """O loop do menu. `entrada`, `saida` e `ler_senha` sao trocados nos testes."""
 
-    def __init__(self, usuarios, tarefas, entrada=input, saida=print,
-                 ler_senha=getpass.getpass):
+    def __init__(self, usuarios, tarefas, entrada=None, saida=None, ler_senha=None):
         self.usuarios = usuarios
         self.tarefas = tarefas
-        self.entrada = entrada
-        self.saida = saida
-        self.ler_senha = ler_senha
+        # input, print e getpass sao procurados na hora da chamada, e nao na
+        # definicao da classe: o Colab troca o input() e o getpass() a cada
+        # celula executada, e uma referencia guardada antes ficaria velha.
+        self.entrada = entrada or (lambda rotulo: input(rotulo))
+        self.saida = saida or (lambda texto: print(texto))
+        self.ler_senha = ler_senha or (lambda rotulo: getpass.getpass(rotulo))
         self.usuario = None
 
     # ponto de entrada
