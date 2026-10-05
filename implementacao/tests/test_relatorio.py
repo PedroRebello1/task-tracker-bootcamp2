@@ -10,7 +10,7 @@ from src import configuracao
 from src.modelos.tarefa import Tarefa
 from src.servicos import relatorio
 
-HOJE = date(2026, 9, 22)
+HOJE = date(2026, 10, 6)
 
 
 def tarefa(id=1, data=None, prioridade="Alta", categoria="Estudo", concluida=False):
@@ -18,8 +18,8 @@ def tarefa(id=1, data=None, prioridade="Alta", categoria="Estudo", concluida=Fal
         id=id, titulo="Tarefa %s" % id, data_prevista=data or HOJE,
         prioridade=prioridade, categoria=categoria, usuario_id=1,
         status=configuracao.STATUS_CONCLUIDA if concluida else configuracao.STATUS_PENDENTE,
-        data_criacao=datetime(2026, 9, 16, 9, 0),
-        data_conclusao=datetime(2026, 9, 21, 9, 0) if concluida else None,
+        data_criacao=datetime(2026, 9, 30, 9, 0),
+        data_conclusao=datetime(2026, 10, 5, 9, 0) if concluida else None,
     )
 
 

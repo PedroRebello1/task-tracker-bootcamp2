@@ -12,9 +12,9 @@ from src.repositorio.repositorio_json import RepositorioJson
 from src.servicos.gerenciador_tarefas import GerenciadorTarefas
 from src.servicos.validacoes import ErroDeRegra
 
-HOJE = date(2026, 9, 22)
-SEGUNDA = date(2026, 9, 21)
-DOMINGO = date(2026, 9, 27)
+HOJE = date(2026, 10, 6)
+SEGUNDA = date(2026, 10, 5)
+DOMINGO = date(2026, 10, 11)
 
 
 @pytest.fixture
@@ -199,8 +199,8 @@ class TestFiltros:
     def povoado(self, gerenciador, pedro):
         criar(gerenciador, pedro, "Hoje", HOJE)
         criar(gerenciador, pedro, "Nesta semana", DOMINGO)
-        criar(gerenciador, pedro, "Neste mês", date(2026, 9, 30))
-        criar(gerenciador, pedro, "Mês que vem", date(2026, 10, 15))
+        criar(gerenciador, pedro, "Neste mês", date(2026, 10, 14))
+        criar(gerenciador, pedro, "Mês que vem", date(2026, 11, 15))
         return gerenciador
 
     def test_filtro_hoje(self, povoado, pedro):

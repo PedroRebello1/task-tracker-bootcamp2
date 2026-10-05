@@ -276,7 +276,7 @@ def conferir_data(texto, hoje=None):
     """RN02 - DD/MM/AAAA, de hoje em diante."""
     iso = validacoes.data_para_iso(texto)
     # data_para_iso devolve sem mudar o que nao esta em DD/MM/AAAA. Sem esta
-    # checagem, '2026-10-15' passaria direto pela converter_data.
+    # checagem, '2026-10-29' passaria direto pela converter_data.
     data, erro = validacoes.converter_data(iso)
     if erro or iso == texto.strip():
         # A mensagem do servico fala em calendario, que aqui nao existe.
@@ -288,12 +288,12 @@ def conferir_data(texto, hoje=None):
 # As mesmas de src/cli/formato.py, repetidas aqui porque importar qualquer
 # coisa de src/cli/ carrega o Textual, que o menu numerado nao usa.
 def _data(valor):
-    """date -> '21/09/2026'."""
+    """date -> '05/10/2026'."""
     return valor.strftime("%d/%m/%Y")
 
 
 def _momento(valor):
-    """datetime -> '28/09/2026 às 14:05'."""
+    """datetime -> '12/10/2026 às 14:05'."""
     return valor.strftime("%d/%m/%Y às %H:%M")
 
 

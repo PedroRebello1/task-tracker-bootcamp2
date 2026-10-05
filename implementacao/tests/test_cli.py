@@ -282,10 +282,10 @@ class TestTarefas:
         rodar(fluxo())
 
     def test_data_com_mascara_vira_iso_para_o_servico(self):
-        assert data_para_iso("21/09/2026") == "2026-09-21"
+        assert data_para_iso("05/10/2026") == "2026-10-05"
         assert data_para_iso(" 01/02/2026 ") == "2026-02-01"
         # Texto incompleto segue como está e é recusado por converter_data.
-        assert data_para_iso("21/09/2") == "21/09/2"
+        assert data_para_iso("05/10/2") == "05/10/2"
         assert data_para_iso("") == ""
 
     def test_concluir_e_reabrir(self, preparado):

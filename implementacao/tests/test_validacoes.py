@@ -12,12 +12,12 @@ from src.modelos.tarefa import Tarefa
 from src.modelos.usuario import Usuario
 from src.servicos import validacoes
 
-HOJE = date(2026, 9, 22)
+HOJE = date(2026, 10, 6)
 
 
 def nova_tarefa(**ajustes):
     padrao = dict(id=1, titulo="Estudar", data_prevista=HOJE, prioridade="Alta",
-                  usuario_id=1, data_criacao=datetime(2026, 9, 22, 9, 0))
+                  usuario_id=1, data_criacao=datetime(2026, 10, 6, 9, 0))
     padrao.update(ajustes)
     return Tarefa(**padrao)
 
@@ -48,7 +48,7 @@ class TestRN01TituloObrigatorio:
 class TestRN02DataNaoRetroativa:
     def test_data_de_ontem_e_recusada(self):
         erro = validacoes.validar_data_prevista(HOJE - timedelta(days=1), hoje=HOJE)
-        assert erro == "A data prevista não pode ser anterior a hoje (22/09/2026)."
+        assert erro == "A data prevista não pode ser anterior a hoje (06/10/2026)."
 
     def test_data_de_hoje_passa(self):
         assert validacoes.validar_data_prevista(HOJE, hoje=HOJE) is None
@@ -79,8 +79,8 @@ class TestRN02DataNaoRetroativa:
         assert erro is not None
 
     def test_data_iso_valida_e_convertida(self):
-        data, erro = validacoes.converter_data("2026-09-28")
-        assert erro is None and data == date(2026, 9, 28)
+        data, erro = validacoes.converter_data("2026-10-12")
+        assert erro is None and data == date(2026, 10, 12)
 
 
 # RN03
@@ -160,16 +160,16 @@ class TestRN05Isolamento:
 # RN07
 class TestRN07ConclusaoDepoisDaCriacao:
     def test_conclusao_anterior_a_criacao_e_recusada(self):
-        tarefa = nova_tarefa(data_criacao=datetime(2026, 9, 22, 10, 0))
-        erro = validacoes.validar_conclusao(tarefa, momento=datetime(2026, 9, 21, 23, 0))
+        tarefa = nova_tarefa(data_criacao=datetime(2026, 10, 6, 10, 0))
+        erro = validacoes.validar_conclusao(tarefa, momento=datetime(2026, 10, 5, 23, 0))
         assert "anterior" in erro
 
     def test_conclusao_posterior_a_criacao_passa(self):
-        tarefa = nova_tarefa(data_criacao=datetime(2026, 9, 22, 10, 0))
-        assert validacoes.validar_conclusao(tarefa, momento=datetime(2026, 9, 22, 11, 0)) is None
+        tarefa = nova_tarefa(data_criacao=datetime(2026, 10, 6, 10, 0))
+        assert validacoes.validar_conclusao(tarefa, momento=datetime(2026, 10, 6, 11, 0)) is None
 
     def test_conclusao_no_mesmo_instante_passa(self):
-        momento = datetime(2026, 9, 22, 10, 0)
+        momento = datetime(2026, 10, 6, 10, 0)
         assert validacoes.validar_conclusao(nova_tarefa(data_criacao=momento), momento) is None
 
 
@@ -237,15 +237,15 @@ class TestCategoriaOpcional:
 # RN07 aplicada ao que ja esta no arquivo
 class TestCoerenciaTemporalGravada:
     def test_tarefa_coerente_nao_gera_aviso(self):
-        tarefa = nova_tarefa(data_criacao=datetime(2026, 9, 22, 9, 0),
-                             data_conclusao=datetime(2026, 9, 22, 18, 0))
+        tarefa = nova_tarefa(data_criacao=datetime(2026, 10, 6, 9, 0),
+                             data_conclusao=datetime(2026, 10, 6, 18, 0))
         assert validacoes.validar_coerencia_temporal(tarefa) is None
 
     def test_tarefa_pendente_nao_gera_aviso(self):
         assert validacoes.validar_coerencia_temporal(nova_tarefa()) is None
 
     def test_conclusao_anterior_a_criacao_e_sinalizada(self):
-        tarefa = nova_tarefa(id=7, data_criacao=datetime(2026, 9, 22, 9, 0),
-                             data_conclusao=datetime(2026, 9, 21, 9, 0))
+        tarefa = nova_tarefa(id=7, data_criacao=datetime(2026, 10, 6, 9, 0),
+                             data_conclusao=datetime(2026, 10, 5, 9, 0))
         aviso = validacoes.validar_coerencia_temporal(tarefa)
         assert aviso is not None and "#7" in aviso

@@ -260,14 +260,14 @@ class TestConferencias:
         assert main.conferir_titulo("  Estudar  ") == ("Estudar", None)
 
     def test_data_valida_vira_date(self):
-        hoje = date(2026, 9, 22)
-        assert main.conferir_data("22/09/2026", hoje=hoje) == (date(2026, 9, 22), None)
+        hoje = date(2026, 10, 6)
+        assert main.conferir_data("06/10/2026", hoje=hoje) == (date(2026, 10, 6), None)
 
     def test_data_de_ontem_e_recusada(self):
-        _, erro = main.conferir_data("21/09/2026", hoje=date(2026, 9, 22))
-        assert erro == "A data prevista não pode ser anterior a hoje (22/09/2026)."
+        _, erro = main.conferir_data("05/10/2026", hoje=date(2026, 10, 6))
+        assert erro == "A data prevista não pode ser anterior a hoje (06/10/2026)."
 
-    @pytest.mark.parametrize("texto", ["", "2026-09-22", "22/9/2026", "31/02/2026", "amanhã"])
+    @pytest.mark.parametrize("texto", ["", "2026-10-06", "6/10/2026", "31/02/2026", "amanhã"])
     def test_data_fora_do_formato_e_recusada(self, texto):
-        data, erro = main.conferir_data(texto, hoje=date(2026, 9, 22))
+        data, erro = main.conferir_data(texto, hoje=date(2026, 10, 6))
         assert data is None and erro.startswith("Data inválida.")

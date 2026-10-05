@@ -41,7 +41,7 @@ class TestExemplo:
 
     def test_reancoragem_traz_a_referencia_para_hoje(self):
         original = [{"data_prevista": exemplo.REFERENCIA.isoformat(),
-                     "data_criacao": "2026-09-14T09:00:00",
+                     "data_criacao": "2026-10-05T09:00:00",
                      "data_conclusao": None}]
         alvo = date(2030, 1, 15)
         ajustada = exemplo.reancorar_tarefas(original, hoje=alvo)[0]
@@ -49,8 +49,8 @@ class TestExemplo:
         assert ajustada["data_conclusao"] is None
 
     def test_reancoragem_preserva_a_distancia_entre_as_datas(self):
-        original = [{"data_prevista": "2026-09-20", "data_criacao": "2026-09-16T08:00:00",
-                     "data_conclusao": "2026-09-18T10:30:00"}]
+        original = [{"data_prevista": "2026-10-11", "data_criacao": "2026-10-07T08:00:00",
+                     "data_conclusao": "2026-10-09T10:30:00"}]
         ajustada = exemplo.reancorar_tarefas(original, hoje=date(2030, 1, 15))[0]
         prevista = date.fromisoformat(ajustada["data_prevista"])
         criada = datetime.fromisoformat(ajustada["data_criacao"])

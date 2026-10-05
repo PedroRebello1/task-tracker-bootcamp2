@@ -13,12 +13,12 @@ COR_STATUS = {configuracao.STATUS_CONCLUIDA: "green", configuracao.STATUS_PENDEN
 
 
 def data(valor):
-    """date -> '21/09/2026'."""
+    """date -> '05/10/2026'."""
     return valor.strftime("%d/%m/%Y")
 
 
 def momento(valor):
-    """datetime -> '28/09/2026 às 14:05'."""
+    """datetime -> '12/10/2026 às 14:05'."""
     return valor.strftime("%d/%m/%Y às %H:%M")
 
 
