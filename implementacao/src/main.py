@@ -135,22 +135,39 @@ class MenuNumerado:
 
     # Passo 3
     def cadastrar(self):
+        """Pergunta campo a campo. Resposta invalida mostra o erro e repete a pergunta.
+
+        O GerenciadorTarefas confere tudo de novo ao gravar. A pergunta previne
+        o erro, o servico garante a integridade, como a barreira dupla da web.
+        """
         self.cabecalho("Cadastrar nova tarefa")
-        titulo = self.perguntar("Título: ")
-        descricao = self.perguntar("Descrição (opcional): ")
-        prioridade = self.perguntar("Prioridade (%s): " % _ou(configuracao.PRIORIDADES))
-        categoria = self.perguntar("Categoria (%s) [%s]: "
-                                   % (_ou(configuracao.CATEGORIAS), configuracao.CATEGORIA_PADRAO))
-        data = self.perguntar("Data limite (DD/MM/AAAA): ")
+        titulo = self.ler_campo("Título: ", conferir_titulo)
+        descricao = self.ler_campo("Descrição (opcional): ", conferir_descricao)
+        prioridade = self.ler_campo("Prioridade (%s): " % _ou(configuracao.PRIORIDADES),
+                                    conferir_prioridade)
+        categoria = self.ler_campo("Categoria (%s) [%s]: "
+                                   % (_ou(configuracao.CATEGORIAS), configuracao.CATEGORIA_PADRAO),
+                                   conferir_categoria)
+        data = self.ler_campo("Data limite (DD/MM/AAAA): ", conferir_data)
 
         tarefa, erros = self.tarefas.criar(self.usuario, titulo, descricao,
-                                           validacoes.data_para_iso(data), prioridade, categoria)
+                                           data.isoformat(), prioridade, categoria)
         if erros:
+            # So acontece se algo mudar entre a pergunta e a gravacao, como a
+            # virada do dia deixando a data no passado.
             for erro in erros:
                 self.mostrar(erro)
             self.mostrar("A tarefa não foi cadastrada.")
             return
         self.mostrar("Tarefa criada com sucesso. (#%d, status %s)" % (tarefa.id, tarefa.status))
+
+    def ler_campo(self, rotulo, conferir):
+        """Repete a pergunta ate `conferir` aceitar o que foi digitado."""
+        while True:
+            valor, erro = conferir(self.perguntar(rotulo))
+            if erro is None:
+                return valor
+            self.mostrar(erro)
 
     # Passo 2, no recorte "Todas"
     def visualizar(self):
@@ -187,6 +204,43 @@ class MenuNumerado:
         for rotulo, valor in campos:
             self.mostrar("    %-14s%s" % (rotulo + ":", valor))
         self.mostrar()
+
+
+# conferencia campo a campo
+# Cada uma recebe o texto digitado e devolve (valor, erro). As regras sao as de
+# validacoes.py, as mesmas que o GerenciadorTarefas aplica ao gravar (Passo 3.4).
+def conferir_titulo(texto):
+    """RN01 - vazio ou so espacos e recusado; ate 60 caracteres."""
+    return texto.strip(), validacoes.validar_titulo(texto)
+
+
+def conferir_descricao(texto):
+    """Opcional, ate 300 caracteres."""
+    return texto.strip(), validacoes.validar_descricao(texto)
+
+
+def conferir_prioridade(texto):
+    """RN03 - so Alta, Média (ou Media) e Baixa, sem diferenciar maiusculas."""
+    prioridade = validacoes.normalizar_prioridade(texto)
+    return prioridade, validacoes.validar_prioridade(prioridade)
+
+
+def conferir_categoria(texto):
+    """RN03 - opcional. Enter vazio vira a categoria padrao."""
+    categoria = validacoes.normalizar_categoria(texto)
+    return categoria, validacoes.validar_categoria(categoria)
+
+
+def conferir_data(texto, hoje=None):
+    """RN02 - DD/MM/AAAA, de hoje em diante."""
+    iso = validacoes.data_para_iso(texto)
+    # data_para_iso devolve sem mudar o que nao esta em DD/MM/AAAA. Sem esta
+    # checagem, '2026-10-15' passaria direto pela converter_data.
+    data, erro = validacoes.converter_data(iso)
+    if erro or iso == texto.strip():
+        # A mensagem do servico fala em calendario, que aqui nao existe.
+        return None, "Data inválida. Use o formato DD/MM/AAAA (dia/mês/ano)."
+    return data, validacoes.validar_data_prevista(data, hoje=hoje)
 
 
 # formatacao
