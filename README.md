@@ -155,6 +155,8 @@ No cadastro, cada campo é conferido assim que é digitado. Uma resposta inváli
 
 A tarefa nasce com o status **Pendente**. A opção 2 lista todas as tarefas da conta, com todos os campos, ou avisa "Nenhuma tarefa cadastrada no momento." quando não há nenhuma. `Ctrl+C` também encerra, sem perder nada: cada cadastro já foi gravado no arquivo.
 
+Para o administrador, o menu ganha a opção `4. Visão administrativa`, com as tarefas de todos os usuários e o dono de cada uma (Passo 9). As opções 1 a 3 continuam com os mesmos números para todos. Fora da opção 4, o administrador vê só as próprias tarefas, como no painel. Um usuário comum que digite 4 recebe "Acesso restrito ao administrador." (RN05).
+
 ### Executar no Google Colab
 
 O notebook [`implementacao/TaskTracker_Colab.ipynb`](implementacao/TaskTracker_Colab.ipynb) roda o menu numerado sem instalar nada na máquina. Ele clona este repositório, instala as dependências, carrega os dados de exemplo e executa `src/main.py`; por último, roda os testes.
@@ -167,7 +169,7 @@ O notebook [`implementacao/TaskTracker_Colab.ipynb`](implementacao/TaskTracker_C
 python -m pytest
 ```
 
-São **282 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas).
+São **290 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas).
 
 ---
 
@@ -314,7 +316,7 @@ A RN02 e a RN03 têm **barreira dupla**: o navegador impede o erro pelo próprio
 | `tests/test_relogio_e_exemplo.py`   | Fuso horário e o instalador dos dados de exemplo                                                                                       |
 | `tests/test_rotas.py`               | O que só existe no HTTP: RN06 em duas etapas, RN05 por URL, CSRF, páginas de erro, herança de filtros                                |
 | `tests/test_cli.py`                 | O modo terminal: tela de escolha, login e bloqueio, formulário, RN04, RN06, filtros, relatório, RN05 e as opções`--web`/`--cli`/`--menu` |
-| `tests/test_main.py`                | O menu numerado: loop e opção inválida, login e criação de conta, RN01, RN02 e RN03 com repetição da pergunta, lista vazia, todos os campos na listagem, RN05 e saída por `3`, `Ctrl+C` ou fim da entrada |
+| `tests/test_main.py`                | O menu numerado: loop e opção inválida, login e criação de conta, RN01, RN02 e RN03 com repetição da pergunta, lista vazia, todos os campos na listagem, RN05, visão administrativa (opção 4) e saída por `3`, `Ctrl+C` ou fim da entrada |
 
 </details>
 
@@ -328,7 +330,7 @@ Caminhos relativos a `implementacao/`.
 | Caminho                                  | Responsabilidade                                                                                                  |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `src/app.py`                           | Ponto de entrada. Pergunta terminal ou web, cria o servidor e define os endereços. Coordena, não contém regra. |
-| `src/main.py`                          | O menu numerado, só com `input()` e `print()`, sobre os mesmos serviços. Sem regra de negócio.                   |
+| `src/main.py`                          | O menu numerado, só com `input()` e `print()`, sobre os mesmos serviços: cadastrar, visualizar, sair e, para o admin, a visão administrativa. Sem regra de negócio. |
 | `TaskTracker_Colab.ipynb`              | Notebook do Google Colab que clona o repositório, carrega os dados de exemplo e executa o menu numerado.         |
 | `src/cli/`                             | O modo terminal em Textual: uma tela por rota do web app, sobre os mesmos serviços. Sem regra de negócio.       |
 | `src/configuracao.py`                  | Caminhos, listas fechadas, limites, fuso e dados do administrador padrão.                                        |
