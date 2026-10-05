@@ -35,6 +35,10 @@ OPCOES = (
     ("3", "Sair da aplicação"),
 )
 
+# Passo 9 - so aparece no menu do administrador. As tres opcoes do enunciado
+# continuam com os mesmos numeros para todo mundo.
+OPCAO_ADMIN = ("4", "Visão administrativa (tarefas de todos os usuários)")
+
 # Palavra que, digitada no lugar do e-mail, abre o cadastro de conta.
 CRIAR_CONTA = "nova"
 
@@ -66,8 +70,10 @@ class MenuNumerado:
                     self.visualizar()
                 elif opcao == "3":
                     break
+                elif opcao == OPCAO_ADMIN[0]:
+                    self.visao_administrativa()
                 else:
-                    self.mostrar("Opção inválida. Escolha 1, 2 ou 3.")
+                    self.mostrar("Opção inválida. Escolha %s." % _ou(self.numeros_validos()))
         except (KeyboardInterrupt, EOFError):
             # Ctrl+C, Ctrl+D ou "interromper execução" no Colab: sai sem traceback.
             # Nada se perde, cada cadastro ja regravou o arquivo (Passo 10.3).
@@ -128,9 +134,17 @@ class MenuNumerado:
         self.mostrar("Conta criada. Agora entre com o e-mail e a senha.")
 
     # menu
+    def opcoes(self):
+        if self.usuario.eh_admin:
+            return OPCOES + (OPCAO_ADMIN,)
+        return OPCOES
+
+    def numeros_validos(self):
+        return [numero for numero, _ in self.opcoes()]
+
     def escolher_opcao(self):
         self.cabecalho("MENU PRINCIPAL")
-        for numero, descricao in OPCOES:
+        for numero, descricao in self.opcoes():
             self.mostrar("%s. %s" % (numero, descricao))
         self.mostrar()
         return self.perguntar("Escolha uma opção: ").strip()
@@ -181,15 +195,37 @@ class MenuNumerado:
         """
         lista = self.tarefas.listar(self.usuario, periodo="todas")
         self.cabecalho("Tarefas cadastradas")
+        self.mostrar_lista(lista)
+        if not lista and self.usuario.eh_admin:
+            # Passo 2.2 - mesmo o admin so ve as proprias tarefas fora da visao administrativa.
+            self.mostrar("Como administrador, as tarefas de todos os usuários ficam na opção %s."
+                         % OPCAO_ADMIN[0])
+
+    # Passo 9
+    def visao_administrativa(self):
+        """Todas as tarefas de todos os usuarios, com o nome do dono.
+
+        Para quem nao é admin, a opcao nem aparece no menu; digitada mesmo
+        assim, recebe a resposta da RN05.
+        """
+        erro = validacoes.validar_acesso_administrativo(self.usuario)
+        if erro:
+            self.mostrar(erro)
+            return
+        lista = self.tarefas.listar(self.usuario, periodo="todas", visao_admin=True)
+        self.cabecalho("Visão administrativa · tarefas de todos os usuários")
+        self.mostrar_lista(lista, donos=self.usuarios.nomes_por_id())
+
+    def mostrar_lista(self, lista, donos=None):
         if not lista:
             self.mostrar("Nenhuma tarefa cadastrada no momento.")
             return
         hoje = relogio.hoje()
         for tarefa in lista:
-            self.mostrar_tarefa(tarefa, hoje)
+            self.mostrar_tarefa(tarefa, hoje, donos)
         self.mostrar("%d %s." % (len(lista), "tarefa" if len(lista) == 1 else "tarefas"))
 
-    def mostrar_tarefa(self, tarefa, hoje):
+    def mostrar_tarefa(self, tarefa, hoje, donos=None):
         prazo = _data(tarefa.data_prevista)
         if tarefa.esta_atrasada(hoje):
             prazo += "  (atrasada)"
@@ -202,6 +238,9 @@ class MenuNumerado:
             ("Criada em", _momento(tarefa.data_criacao)),
             ("Concluída em", _momento(tarefa.data_conclusao) if tarefa.data_conclusao else "—"),
         )
+        if donos is not None:
+            # Passo 9.3 - na visao administrativa, a coluna do dono.
+            campos = (("Dono", donos.get(tarefa.usuario_id, "—")),) + campos
         self.mostrar("#%d  %s" % (tarefa.id, tarefa.titulo))
         for rotulo, valor in campos:
             self.mostrar("    %-14s%s" % (rotulo + ":", valor))
