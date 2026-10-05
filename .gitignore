@@ -24,8 +24,4 @@ implementacao/dados/*.json
 .env
 *.local
 
-# transcript/
-# PROMPT_MODO_CLI.md
-# commit_steps.json
-# repo_tree.txt
-# .claude/
+temp/
