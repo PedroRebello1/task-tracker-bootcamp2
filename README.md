@@ -435,7 +435,7 @@ A preparação dos dados roda na **primeira requisição**, e não apenas no `py
 
 <br>
 
-Os arquivos-fonte (`implementacao/dados/*.exemplo.json`) são versionados e podem ser copiados manualmente para `tarefas.json` e `usuarios.json`. O instalador (`python -m src.exemplo`) faz uma coisa a mais: **desloca todas as datas** para que a semana do exemplo caia sobre a semana atual. Sem isso, o painel abriria vazio, porque o filtro padrão é "Hoje" e as datas gravadas no arquivo são de setembro de 2026.
+Os arquivos-fonte (`implementacao/dados/*.exemplo.json`) são versionados e podem ser copiados manualmente para `tarefas.json` e `usuarios.json`. O instalador (`python -m src.exemplo`) faz uma coisa a mais: **desloca todas as datas** para que a semana do exemplo caia sobre a semana atual. Sem isso, o painel abriria vazio, porque o filtro padrão é "Hoje" e as datas gravadas no arquivo são de outubro de 2026.
 
 </details>
 

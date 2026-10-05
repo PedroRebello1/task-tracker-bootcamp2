@@ -17,7 +17,7 @@ from datetime import date, datetime
 from src import configuracao
 from src.servicos import relogio
 
-REFERENCIA = date(2026, 9, 23)
+REFERENCIA = date(2026, 10, 7)
 
 # Os arquivos de exemplo são versionados junto com o codigo, entao moram sempre
 # em implementacao/dados/ - e nao na pasta de dados.

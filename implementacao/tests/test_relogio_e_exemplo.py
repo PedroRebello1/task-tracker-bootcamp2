@@ -6,6 +6,7 @@ from datetime import date, datetime
 import pytest
 
 from src import configuracao, exemplo
+from src.modelos.tarefa import Tarefa
 from src.servicos import relogio
 
 
@@ -55,6 +56,19 @@ class TestExemplo:
         criada = datetime.fromisoformat(ajustada["data_criacao"])
         assert (prevista - criada.date()).days == 4
         assert criada.hour == 8 and criada.minute == 0
+
+    def test_so_a_tarefa_deliberadamente_atrasada_nasce_atrasada(self):
+        """A REFERENCIA é o "hoje" do arquivo de exemplo.
+
+        Se ela se descolar das datas gravadas, a instalacao cai na semana
+        errada e o painel abre cheio de tarefas atrasadas.
+        """
+        hoje = date(2030, 1, 15)
+        tarefas = [Tarefa.de_dict(registro) for registro
+                   in exemplo.reancorar_tarefas(exemplo._ler("tarefas"), hoje=hoje)]
+        atrasadas = [tarefa.titulo for tarefa in tarefas if tarefa.esta_atrasada(hoje)]
+        assert atrasadas == ["Renovar o empréstimo da biblioteca"]
+        assert any(tarefa.data_prevista == hoje for tarefa in tarefas)
 
     def test_instalar_em_pasta_vazia(self, tmp_path, monkeypatch):
         monkeypatch.setattr(configuracao, "PASTA_DADOS", str(tmp_path))
