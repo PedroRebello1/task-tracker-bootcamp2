@@ -9,6 +9,8 @@ Sistema de gerenciamento de tarefas pessoais.
 | **Polo / Turma** | EAD — Campus Asa Norte / Turma A    |
 | **E-mail**       | pedro.rebello@sempreceub.com         |
 | **Disciplina**   | Bootcamp II                          |
+| **Vídeo (Etapa 2)** | *pendente*                        |
+| **Google Colab** | *pendente*                           |
 
 ---
 
@@ -18,12 +20,13 @@ Organizar tarefas em caderno, post-it e mensagens para si mesmo funciona até o 
 
 ## A solução
 
-Uma aplicação local em Python com **duas interfaces sobre as mesmas regras e os mesmos dados**:
+Uma aplicação local em Python com **três interfaces sobre as mesmas regras e os mesmos dados**:
 
 - **Web app** (Flask): o programa sobe um servidor na própria máquina e o uso é pelo navegador, em `http://127.0.0.1:5000`.
 - **Modo terminal** (Textual): uma aplicação de tela cheia dentro do próprio terminal, com tabelas, formulários, diálogos e mouse.
+- **Menu numerado** (`input()` e `print()`): a CLI clássica pedida pelo enunciado da Etapa 2, com `1. Cadastrar`, `2. Visualizar` e `3. Sair`. É também a interface que roda no Google Colab.
 
-Ao iniciar, o sistema pergunta qual das duas usar. Cada pessoa faz login e tem uma área própria, onde só enxerga e altera as suas tarefas.
+Ao iniciar, o sistema pergunta qual das duas primeiras usar; o menu numerado tem comando próprio. Cada pessoa faz login e tem uma área própria, onde só enxerga e altera as suas tarefas.
 
 - **Filtros de período** — Hoje, Semana, Mês e Todas, para responder "o que eu tenho para hoje?" sem reler nada
 - **Filtro de situação** — Todas, Pendentes, Concluídas e Atrasadas, mais busca por palavra no título
@@ -33,24 +36,18 @@ Ao iniciar, o sistema pergunta qual das duas usar. Cada pessoa faz login e tem u
 - **Relatório resumido** — total, concluídas, pendentes, atrasadas, percentual de conclusão e distribuições por prioridade e categoria
 - **Visão administrativa** — perfil `admin`, que enxerga as tarefas de todos os usuários
 
-### Por que duas interfaces
+### Por que três interfaces
 
 A Etapa 1 planejou uma aplicação **100% web**: servidor Flask local e acesso pelo navegador. Na webaula 3, o enunciado da Etapa 2 apresentou a construção da aplicação como uma **CLI** — interface de linha de comando, executada no terminal. Em vez de abandonar o plano original ou reescrever o sistema, o plano foi ampliado: a aplicação ganhou uma segunda interface, de terminal, ao lado da web.
 
 Isso foi possível sem tocar em nenhuma regra de negócio porque a estrutura desenhada na Etapa 1 já separava o sistema em camadas: as regras (RN01 a RN07), as operações sobre tarefas, a autenticação, o relatório e a persistência não conhecem HTTP nem templates. O web app é uma camada fina de apresentação sobre esses módulos — e o modo terminal é outra, igualmente fina, sobre os **mesmos** módulos e os **mesmos** arquivos de dados. O que a web recusa, o terminal recusa com a mesma mensagem, e os dois podem até rodar ao mesmo tempo.
 
-### Próximo passo: menu numerado e execução no Google Colab (a implementar)
+Com as duas interfaces já construídas, ficaram claros dois requisitos da entrega da Etapa 2 que elas não atendiam:
 
-Com as duas interfaces já construídas, ficaram claros dois requisitos da entrega da Etapa 2 que elas ainda não atendem:
-
-- **Menu numerado em loop contínuo.** O enunciado pede uma CLI clássica, com as opções `1. Cadastrar nova tarefa`, `2. Visualizar tarefas cadastradas` e `3. Sair da aplicação`. Nela, uma entrada inválida (título vazio ou prioridade fora da lista) gera mensagem de erro e repete a pergunta. O modo terminal atual é uma aplicação de tela cheia, com formulários e atalhos de teclado, e a prioridade é escolhida numa lista, então não há como digitá-la errado.
+- **Menu numerado em loop contínuo.** O enunciado pede uma CLI clássica, com as opções `1. Cadastrar nova tarefa`, `2. Visualizar tarefas cadastradas` e `3. Sair da aplicação`, em que uma entrada inválida (título vazio ou prioridade fora da lista) gera mensagem de erro e repete a pergunta. O modo terminal é uma aplicação de tela cheia, com formulários e atalhos de teclado, e nele a prioridade é escolhida numa lista, então não há como digitá-la errado.
 - **Link do Google Colab.** O formulário de entrega pede, além do GitHub e do vídeo, um link do Colab, a plataforma oficial da disciplina. Nem a interface Textual, que precisa de um terminal real, nem o servidor Flask rodam dentro de uma célula do Colab.
 
-Os dois serão atendidos por uma **terceira interface**: um menu numerado simples em `implementacao/src/main.py`, feito apenas com `input()` e `print()`, que valida campo a campo e repete a pergunta até a entrada ser válida. Um notebook do Colab vai clonar este repositório e executar esse menu. Junto com ele, a prioridade passará a aceitar "Media" sem acento, como pede o enunciado.
-
-Como as outras duas, essa camada não terá regra de negócio própria. Ela chamará os mesmos serviços (`validacoes`, `GerenciadorTarefas`, `GerenciadorUsuarios`) e gravará nos mesmos arquivos de dados. A especificação da Etapa 1 continua sem alterações.
-
-> **Situação:** a implementar. O link do Colab e as instruções de execução do menu serão adicionados a este README quando estiverem prontos.
+A resposta foi a mesma da primeira vez: mais uma camada fina. O **menu numerado**, em `implementacao/src/main.py`, é feito só com `input()` e `print()`, confere cada campo assim que ele é digitado e repete a pergunta até a entrada ser válida. O **notebook do Colab** clona este repositório e executa esse mesmo arquivo. Junto com eles, a prioridade passou a aceitar "Media" sem acento, como pede o enunciado. Essa mudança vale para as três interfaces, porque a regra mora nos serviços e não nas telas.
 
 ---
 
@@ -102,6 +99,7 @@ Para pular a pergunta:
 ```
 python -m src.app --web     # sobe o servidor direto (acesse http://127.0.0.1:5000)
 python -m src.app --cli     # entra no modo terminal direto
+python -m src.app --menu    # abre o menu numerado
 ```
 
 Sem os dados de exemplo, a primeira execução cria sozinha a pasta `dados/` e um administrador padrão, **`admin@tasktracker.local` / `admin123`**. Qualquer pessoa pode criar a própria conta pela tela de cadastro.
@@ -127,13 +125,49 @@ Funciona em qualquer terminal moderno — Windows Terminal, PowerShell, o termin
 
 No terminal, as datas são digitadas no formato `DD/MM/AAAA`.
 
+### Usando o menu numerado
+
+A CLI pedida pelo enunciado da Etapa 2. Os três comandos abaixo são equivalentes:
+
+```
+python -m src.main
+python src/main.py
+python -m src.app --menu
+```
+
+Primeiro vem o login, com e-mail e senha (digite `nova` no lugar do e-mail para criar uma conta). Depois, o menu, em loop contínuo até a opção 3:
+
+```
+1. Cadastrar nova tarefa
+2. Visualizar tarefas cadastradas
+3. Sair da aplicação
+```
+
+No cadastro, cada campo é conferido assim que é digitado. Uma resposta inválida mostra o erro e repete a pergunta:
+
+| Campo       | O que é aceito                                                                        |
+| ----------- | ------------------------------------------------------------------------------------- |
+| Título      | Obrigatório, sem ser vazio nem só espaços, até 60 caracteres (RN01)                   |
+| Descrição   | Opcional, até 300 caracteres                                                          |
+| Prioridade  | `Alta`, `Média` (ou `Media`) ou `Baixa`, sem diferenciar maiúsculas (RN03)            |
+| Categoria   | Opcional, Enter vazio vale `Geral`; Estudo, Trabalho, Pessoal, Saúde ou Geral (RN03) |
+| Data limite | `DD/MM/AAAA`, de hoje em diante (RN02)                                                |
+
+A tarefa nasce com o status **Pendente**. A opção 2 lista todas as tarefas da conta, com todos os campos, ou avisa "Nenhuma tarefa cadastrada no momento." quando não há nenhuma. `Ctrl+C` também encerra, sem perder nada: cada cadastro já foi gravado no arquivo.
+
+### Executar no Google Colab
+
+O notebook [`implementacao/TaskTracker_Colab.ipynb`](implementacao/TaskTracker_Colab.ipynb) roda o menu numerado sem instalar nada na máquina. Ele clona este repositório, instala as dependências, carrega os dados de exemplo e executa `src/main.py`; por último, roda os testes.
+
+**Link do Colab:** *pendente*
+
 ### 4. Rodar os testes
 
 ```
 python -m pytest
 ```
 
-São **239 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app e o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal).
+São **282 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas).
 
 ---
 
@@ -158,7 +192,9 @@ Detalhamento completo, com exemplos e mensagens de erro, no documento de planeja
 A especificação da Etapa 1 foi entregue e não foi alterada. O que a implementação acrescentou além dela:
 
 - **Modo terminal** como segunda interface, escolhida ao iniciar — sem tocar nas regras, nas telas web nem no formato dos dados.
-- **Menu numerado e notebook do Google Colab** *(a implementar)* — terceira interface, exigida pela entrega da Etapa 2; ver [Próximo passo](#próximo-passo-menu-numerado-e-execução-no-google-colab-a-implementar).
+- **Menu numerado** como terceira interface, e um **notebook do Google Colab** que o executa — exigidos pela entrega da Etapa 2; ver [Por que três interfaces](#por-que-três-interfaces).
+- **Prioridade digitada sem acento**: `Media` vale como `Média`, como pede o enunciado da Etapa 2. A Etapa 1 só previa seletores, sem digitação.
+- **Data limite no menu numerado**: o enunciado da Etapa 2 aceita formato livre, mas o menu segue a RN02 da Etapa 1 e exige uma data real em `DD/MM/AAAA`, de hoje em diante.
 - **Filtro por situação** (Pendentes, Concluídas, Atrasadas), ao lado do filtro de período: a pergunta que motivou o sistema é sobre o que está *pendente*.
 - **Data de conclusão visível** na listagem e nas confirmações, para que o histórico protegido pela RN04 sirva para alguma coisa.
 - **Fuso horário explícito** (`America/Sao_Paulo`): o sistema gira em torno de "hoje", e num servidor em UTC uma tarefa criada às 21h30 nasceria com a data do dia seguinte.
@@ -166,6 +202,7 @@ A especificação da Etapa 1 foi entregue e não foi alterada. O que a implement
 - **Números do resumo clicáveis**, como atalho para o filtro de situação correspondente.
 - **Lista de tarefas no relatório**, ao lado das distribuições.
 - **Tema claro/escuro**, com a escolha gravada na conta.
+- **Licença GNU GPL v3.0**, e não a MIT citada no Mapeamento Arquitetural da Etapa 1.
 
 ---
 
@@ -180,21 +217,23 @@ A especificação da Etapa 1 foi entregue e não foi alterada. O que a implement
 ### Estrutura do repositório
 
 ```
-task-tracker/
+task-tracker-bootcamp2/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
 │
 ├── especificacao/                       ← ETAPA 1
-│   ├── Planejamento Lógico TaskTracker.pdf
-│   ├── Mapeamento Arquitetural TaskTracker.pdf
+│   ├── Planejamento Lógico TaskTracker - Pedro Rebello Borges de Barros.pdf
+│   ├── Mapeamento Arquitetural TaskTracker - Pedro Rebello Borges de Barros.pdf
 │   └── Entrega Etapa Inicial.pdf
 │
 ├── implementacao/                       ← ETAPA 2
 │   ├── requirements.txt
 │   ├── pytest.ini
+│   ├── TaskTracker_Colab.ipynb          notebook do Google Colab que executa o menu numerado
 │   ├── src/
 │   │   ├── app.py                       ponto de entrada: pergunta terminal ou web, define as rotas
+│   │   ├── main.py                      menu numerado: cadastrar, visualizar e sair
 │   │   ├── configuracao.py              constantes, listas fechadas, limites, caminhos
 │   │   ├── exemplo.py                   instalador dos dados de exemplo
 │   │   ├── modelos/                     classes Tarefa e Usuario
@@ -206,10 +245,21 @@ task-tracker/
 │   ├── dados/                           persistência em JSON (só os *.exemplo.json vão para o Git)
 │   └── tests/                           testes automatizados com pytest
 │
-└── docker/                              ← ETAPA 3 (a construir)
+└── docker/                              ← ETAPA 3 (a construir; por ora só o .gitkeep)
 ```
 
-O `src/` é dividido por **responsabilidade**, não por tipo de arquivo. As regras de negócio ficam em `servicos/` e nunca dentro das telas — é isso que permite testá-las sem abrir o navegador, e é o que permitiu acrescentar o modo terminal sem reescrever nenhuma regra.
+O `src/` é dividido por **responsabilidade**, não por tipo de arquivo. As regras de negócio ficam em `servicos/` e nunca dentro das telas — é isso que permite testá-las sem abrir o navegador, e é o que permitiu acrescentar o modo terminal e o menu numerado sem reescrever nenhuma regra.
+
+### Correspondência com a árvore do enunciado da Etapa 2
+
+O enunciado da Etapa 2 mostra uma árvore genérica. Este repositório segue a árvore planejada na própria Etapa 1, e cada item do enunciado tem um equivalente direto:
+
+| Enunciado da Etapa 2           | Neste repositório                                                                                                          |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                    | `README.md`                                                                                                                |
+| `.gitignore`                   | `.gitignore`                                                                                                               |
+| `docs/planejamento_logico.pdf` | `especificacao/Planejamento Lógico TaskTracker - Pedro Rebello Borges de Barros.pdf`, com o Mapeamento Arquitetural ao lado |
+| `src/main.py`                  | `implementacao/src/main.py`                                                                                                |
 
 ## Stack
 
@@ -218,6 +268,7 @@ O `src/` é dividido por **responsabilidade**, não por tipo de arquivo. As regr
 - **Textual 8.x** — interface de terminal; traz o Rich
 - **tzdata** — base de fusos horários, que o Python não embute no Windows
 - **pytest 8.x** — testes automatizados
+- **Google Colab** — onde o menu numerado roda sem instalar nada na máquina
 - **Persistência em JSON** — legível a olho nu, nativo do Python e adequado como volume do Docker na Etapa 3
 
 ---
@@ -237,13 +288,13 @@ As funções ficam em `implementacao/src/servicos/validacoes.py`; os testes, em 
 | -------------------------------------- | ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
 | **RN01** título obrigatório    | `validacoes.validar_titulo`                                             | `TestRN01TituloObrigatorio`                                                          |
 | **RN02** data não retroativa    | `validacoes.validar_data_prevista` + `min` no `<input type="date">` | `TestRN02DataNaoRetroativa`, `test_rn02_data_retroativa_e_recusada_pelo_servidor`  |
-| **RN03** listas fechadas         | `validacoes.validar_prioridade` / `validar_categoria` + `<select>`  | `TestRN03ListasFechadas`, `test_rn03_prioridade_forjada_e_recusada`                |
+| **RN03** listas fechadas         | `validacoes.validar_prioridade` / `validar_categoria` + `<select>`; `normalizar_prioridade` aceita `Media` sem acento | `TestRN03ListasFechadas`, `test_rn03_prioridade_forjada_e_recusada`                |
 | **RN04** concluída não edita   | `validacoes.validar_edicao_permitida` + tela `tarefa_concluida.html`  | `TestRN04ConcluidaNaoEdita`, `test_rn04_editar_concluida_mostra_a_tela_de_reabrir` |
 | **RN05** isolamento por usuário | `validacoes.validar_permissao` / `validar_acesso_administrativo`      | `TestRN05Isolamento`, `TestRN05PorHttp`                                            |
 | **RN06** exclusão confirmada    | rota`excluir_tarefa` — GET confirma, POST remove                       | `TestRN06Confirmacao`                                                                |
 | **RN07** conclusão ≥ criação | `validacoes.validar_conclusao` e `validar_coerencia_temporal`         | `TestRN07ConclusaoDepoisDaCriacao`, `TestCoerenciaTemporalGravada`                 |
 
-A RN02 e a RN03 têm **barreira dupla**: o navegador impede o erro pelo próprio controle (calendário limitado, lista de opções) e o servidor confere de novo ao receber o formulário. A tela previne o erro honesto; o servidor garante a integridade dos dados.
+A RN02 e a RN03 têm **barreira dupla**: o navegador impede o erro pelo próprio controle (calendário limitado, lista de opções) e o servidor confere de novo ao receber o formulário. A tela previne o erro honesto; o servidor garante a integridade dos dados. No menu numerado é igual: cada campo é conferido ao ser digitado, com as mesmas funções de `validacoes.py`, e o `GerenciadorTarefas` confere tudo de novo ao gravar.
 
 **Sobre a RN07.** No fluxo normal ela nunca dispara: a data de conclusão vem do relógio, e o relógio não anda para trás. Por isso ela ganhou um segundo uso — `validar_coerencia_temporal` aplica a mesma regra ao que **já está gravado**. O arquivo é texto e pode ter sido editado à mão; tarefas incoerentes são listadas no terminal ao subir o servidor.
 
@@ -262,7 +313,8 @@ A RN02 e a RN03 têm **barreira dupla**: o navegador impede o erro pelo próprio
 | `tests/test_relatorio.py`           | Os números do resumo, com a data injetada                                                                                              |
 | `tests/test_relogio_e_exemplo.py`   | Fuso horário e o instalador dos dados de exemplo                                                                                       |
 | `tests/test_rotas.py`               | O que só existe no HTTP: RN06 em duas etapas, RN05 por URL, CSRF, páginas de erro, herança de filtros                                |
-| `tests/test_cli.py`                 | O modo terminal: tela de escolha, login e bloqueio, formulário, RN04, RN06, filtros, relatório, RN05 e as opções`--web`/`--cli` |
+| `tests/test_cli.py`                 | O modo terminal: tela de escolha, login e bloqueio, formulário, RN04, RN06, filtros, relatório, RN05 e as opções`--web`/`--cli`/`--menu` |
+| `tests/test_main.py`                | O menu numerado: loop e opção inválida, login e criação de conta, RN01, RN02 e RN03 com repetição da pergunta, lista vazia, todos os campos na listagem, RN05 e saída por `3`, `Ctrl+C` ou fim da entrada |
 
 </details>
 
@@ -276,6 +328,8 @@ Caminhos relativos a `implementacao/`.
 | Caminho                                  | Responsabilidade                                                                                                  |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `src/app.py`                           | Ponto de entrada. Pergunta terminal ou web, cria o servidor e define os endereços. Coordena, não contém regra. |
+| `src/main.py`                          | O menu numerado, só com `input()` e `print()`, sobre os mesmos serviços. Sem regra de negócio.                   |
+| `TaskTracker_Colab.ipynb`              | Notebook do Google Colab que clona o repositório, carrega os dados de exemplo e executa o menu numerado.         |
 | `src/cli/`                             | O modo terminal em Textual: uma tela por rota do web app, sobre os mesmos serviços. Sem regra de negócio.       |
 | `src/configuracao.py`                  | Caminhos, listas fechadas, limites, fuso e dados do administrador padrão.                                        |
 | `src/exemplo.py`                       | Instalador dos dados de exemplo.                                                                                  |

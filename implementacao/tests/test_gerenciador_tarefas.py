@@ -77,6 +77,12 @@ class TestCriacao:
                                           "urgentíssima", "Geral", hoje=HOJE)
         assert tarefa is None and "Prioridade inválida" in erros[0]
 
+    def test_prioridade_sem_acento_e_gravada_com_acento(self, gerenciador, pedro):
+        tarefa = criar(gerenciador, pedro, prioridade="media", categoria="saude")
+        gravada = gerenciador.listar_todas()[0]
+        assert tarefa.prioridade == gravada.prioridade == "Média"
+        assert gravada.categoria == "Saúde"
+
     def test_dados_sobrevivem_a_releitura_do_arquivo(self, gerenciador, pedro):
         criar(gerenciador, pedro, titulo="Persistir", data=HOJE)
         assert gerenciador.listar_todas()[0].titulo == "Persistir"
@@ -91,6 +97,12 @@ class TestEdicao:
             (HOJE + timedelta(days=2)).isoformat(), "Alta", "Estudo", hoje=HOJE)
         assert erros == []
         assert editada.titulo == "Novo título" and editada.prioridade == "Alta"
+
+    def test_edicao_tambem_aceita_prioridade_sem_acento(self, gerenciador, pedro):
+        tarefa = criar(gerenciador, pedro, prioridade="Alta")
+        editada, erros = gerenciador.editar(pedro, tarefa.id, "Estudar", "",
+                                            HOJE.isoformat(), "MEDIA", "Geral", hoje=HOJE)
+        assert erros == [] and editada.prioridade == "Média"
 
     def test_rn04_tarefa_concluida_nao_pode_ser_editada(self, gerenciador, pedro):
         tarefa = criar(gerenciador, pedro)

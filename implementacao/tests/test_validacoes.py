@@ -96,6 +96,22 @@ class TestRN03ListasFechadas:
     def test_prioridade_com_caixa_diferente_e_recusada(self):
         assert validacoes.validar_prioridade("alta") is not None
 
+    @pytest.mark.parametrize("digitado, esperado", [
+        ("Media", "Média"), ("media", "Média"), ("MÉDIA", "Média"),
+        (" alta ", "Alta"), ("BAIXA", "Baixa"), ("Média", "Média"),
+    ])
+    def test_prioridade_digitada_vira_o_valor_da_lista(self, digitado, esperado):
+        """O enunciado da Etapa 2 aceita "Media" sem acento."""
+        valor = validacoes.normalizar_prioridade(digitado)
+        assert valor == esperado
+        assert validacoes.validar_prioridade(valor) is None
+
+    @pytest.mark.parametrize("digitado", ["Urgente", "1", "", "   ", "Mediana", None])
+    def test_prioridade_fora_da_lista_continua_recusada(self, digitado):
+        valor = validacoes.normalizar_prioridade(digitado)
+        erro = validacoes.validar_prioridade(valor)
+        assert erro == "Prioridade inválida. Os valores aceitos são Alta, Média ou Baixa."
+
     @pytest.mark.parametrize("valor", configuracao.CATEGORIAS)
     def test_categorias_validas_passam(self, valor):
         assert validacoes.validar_categoria(valor) is None
@@ -199,6 +215,13 @@ class TestCategoriaOpcional:
 
     def test_categoria_informada_e_preservada(self):
         assert validacoes.normalizar_categoria(" Saúde ") == "Saúde"
+
+    def test_categoria_digitada_sem_acento_vira_o_valor_da_lista(self):
+        assert validacoes.normalizar_categoria("saude") == "Saúde"
+
+    def test_categoria_fora_da_lista_continua_recusada(self):
+        valor = validacoes.normalizar_categoria("Academia")
+        assert validacoes.validar_categoria(valor) is not None
 
     def test_agregador_aceita_tarefa_sem_categoria(self):
         erros = validacoes.validar_dados_da_tarefa(

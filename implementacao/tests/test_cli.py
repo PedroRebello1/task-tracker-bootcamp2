@@ -18,10 +18,11 @@ from src.cli.aplicacao import AplicacaoTerminal
 from src.cli.boas_vindas import TelaBoasVindas
 from src.cli.conta import TelaLogin
 from src.cli.dialogos import ConfirmarExclusao, TarefaConcluida
-from src.cli.formulario import TelaFormularioTarefa, data_para_iso
+from src.cli.formulario import TelaFormularioTarefa
 from src.cli.painel import TelaPainel
 from src.cli.relatorio import TelaRelatorio
 from src.servicos import relogio
+from src.servicos.validacoes import data_para_iso
 
 TAMANHO = (120, 40)
 
@@ -534,10 +535,13 @@ class TestModoDeExecucao:
     def test_opcoes_pulam_a_pergunta(self):
         assert modulo._modo_de_execucao(["--web"], interativo=True) == "web"
         assert modulo._modo_de_execucao(["--cli"], interativo=False) == "cli"
+        assert modulo._modo_de_execucao(["--menu"], interativo=True) == "menu"
 
     def test_opcoes_sao_excludentes(self):
         with pytest.raises(SystemExit):
             modulo._modo_de_execucao(["--web", "--cli"])
+        with pytest.raises(SystemExit):
+            modulo._modo_de_execucao(["--menu", "--web"])
 
     def test_processo_filho_do_recarregador_nao_pergunta(self, monkeypatch):
         monkeypatch.setenv("WERKZEUG_RUN_MAIN", "true")
