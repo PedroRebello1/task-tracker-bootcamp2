@@ -39,6 +39,19 @@ A Etapa 1 planejou uma aplicação **100% web**: servidor Flask local e acesso p
 
 Isso foi possível sem tocar em nenhuma regra de negócio porque a estrutura desenhada na Etapa 1 já separava o sistema em camadas: as regras (RN01 a RN07), as operações sobre tarefas, a autenticação, o relatório e a persistência não conhecem HTTP nem templates. O web app é uma camada fina de apresentação sobre esses módulos — e o modo terminal é outra, igualmente fina, sobre os **mesmos** módulos e os **mesmos** arquivos de dados. O que a web recusa, o terminal recusa com a mesma mensagem, e os dois podem até rodar ao mesmo tempo.
 
+### Próximo passo: menu numerado e execução no Google Colab (a implementar)
+
+Com as duas interfaces já construídas, ficaram claros dois requisitos da entrega da Etapa 2 que elas ainda não atendem:
+
+- **Menu numerado em loop contínuo.** O enunciado pede uma CLI clássica, com as opções `1. Cadastrar nova tarefa`, `2. Visualizar tarefas cadastradas` e `3. Sair da aplicação`. Nela, uma entrada inválida (título vazio ou prioridade fora da lista) gera mensagem de erro e repete a pergunta. O modo terminal atual é uma aplicação de tela cheia, com formulários e atalhos de teclado, e a prioridade é escolhida numa lista, então não há como digitá-la errado.
+- **Link do Google Colab.** O formulário de entrega pede, além do GitHub e do vídeo, um link do Colab, a plataforma oficial da disciplina. Nem a interface Textual, que precisa de um terminal real, nem o servidor Flask rodam dentro de uma célula do Colab.
+
+Os dois serão atendidos por uma **terceira interface**: um menu numerado simples em `implementacao/src/main.py`, feito apenas com `input()` e `print()`, que valida campo a campo e repete a pergunta até a entrada ser válida. Um notebook do Colab vai clonar este repositório e executar esse menu. Junto com ele, a prioridade passará a aceitar "Media" sem acento, como pede o enunciado.
+
+Como as outras duas, essa camada não terá regra de negócio própria. Ela chamará os mesmos serviços (`validacoes`, `GerenciadorTarefas`, `GerenciadorUsuarios`) e gravará nos mesmos arquivos de dados. A especificação da Etapa 1 continua sem alterações.
+
+> **Situação:** a implementar. O link do Colab e as instruções de execução do menu serão adicionados a este README quando estiverem prontos.
+
 ---
 
 ## Como executar
@@ -145,6 +158,7 @@ Detalhamento completo, com exemplos e mensagens de erro, no documento de planeja
 A especificação da Etapa 1 foi entregue e não foi alterada. O que a implementação acrescentou além dela:
 
 - **Modo terminal** como segunda interface, escolhida ao iniciar — sem tocar nas regras, nas telas web nem no formato dos dados.
+- **Menu numerado e notebook do Google Colab** *(a implementar)* — terceira interface, exigida pela entrega da Etapa 2; ver [Próximo passo](#próximo-passo-menu-numerado-e-execução-no-google-colab-a-implementar).
 - **Filtro por situação** (Pendentes, Concluídas, Atrasadas), ao lado do filtro de período: a pergunta que motivou o sistema é sobre o que está *pendente*.
 - **Data de conclusão visível** na listagem e nas confirmações, para que o histórico protegido pela RN04 sirva para alguma coisa.
 - **Fuso horário explícito** (`America/Sao_Paulo`): o sistema gira em torno de "hoje", e num servidor em UTC uma tarefa criada às 21h30 nasceria com a data do dia seguinte.
@@ -364,8 +378,6 @@ A preparação dos dados roda na **primeira requisição**, e não apenas no `py
 <summary><b>Dados de exemplo</b></summary>
 
 <br>
-
-
 
 Os arquivos-fonte (`implementacao/dados/*.exemplo.json`) são versionados e podem ser copiados manualmente para `tarefas.json` e `usuarios.json`. O instalador (`python -m src.exemplo`) faz uma coisa a mais: **desloca todas as datas** para que a semana do exemplo caia sobre a semana atual. Sem isso, o painel abriria vazio, porque o filtro padrão é "Hoje" e as datas gravadas no arquivo são de setembro de 2026.
 
