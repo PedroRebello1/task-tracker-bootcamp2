@@ -60,6 +60,12 @@ def gravadas():
     return modulo.tarefas.listar_todas()
 
 
+def conta_comum(nome="Ana", login="ana@x.com"):
+    usuario, erros = modulo.usuarios.cadastrar(nome, login, "senha123")
+    assert erros == []
+    return usuario
+
+
 # menu e loop
 class TestMenu:
     def test_mostra_as_tres_opcoes_do_enunciado(self, preparado):
@@ -74,9 +80,14 @@ class TestMenu:
         assert texto.endswith("Encerrando a aplicação. Até logo.")
 
     def test_opcao_invalida_avisa_e_o_loop_continua(self, preparado):
-        _, texto = rodar(ADMIN, "9", "abc", "2", "3")
+        conta_comum()
+        _, texto = rodar("ana@x.com", "9", "abc", "2", "3", senhas=("senha123",))
         assert texto.count("Opção inválida. Escolha 1, 2 ou 3.") == 2
         assert "Nenhuma tarefa cadastrada no momento." in texto
+
+    def test_para_o_admin_a_opcao_invalida_lista_tambem_a_4(self, preparado):
+        _, texto = rodar(ADMIN, "9", "3")
+        assert "Opção inválida. Escolha 1, 2, 3 ou 4." in texto
 
     def test_fim_da_entrada_no_meio_do_cadastro_encerra_sem_erro(self, preparado):
         codigo, texto = rodar(ADMIN, "1", "Estudar")
@@ -191,9 +202,55 @@ class TestVisualizar:
 
     def test_rn05_so_aparecem_as_proprias_tarefas(self, preparado):
         rodar(ADMIN, *cadastro(titulo="Do administrador"), "3")
-        modulo.usuarios.cadastrar("Ana", "ana@x.com", "senha123")
+        conta_comum()
         _, texto = rodar("ana@x.com", "2", "3", senhas=("senha123",))
         assert "Do administrador" not in texto
+        assert "Nenhuma tarefa cadastrada no momento." in texto
+
+
+# Passo 9
+class TestVisaoAdministrativa:
+    def test_admin_ve_a_opcao_4(self, preparado):
+        _, texto = rodar(ADMIN, "3")
+        assert "4. Visão administrativa (tarefas de todos os usuários)" in texto
+
+    def test_usuario_comum_nao_ve_a_opcao_4(self, preparado):
+        conta_comum()
+        _, texto = rodar("ana@x.com", "3", senhas=("senha123",))
+        assert "3. Sair da aplicação" in texto
+        assert "Visão administrativa" not in texto
+
+    def test_rn05_usuario_comum_que_digita_4_recebe_acesso_restrito(self, preparado):
+        conta_comum()
+        _, texto = rodar("ana@x.com", "4", "3", senhas=("senha123",))
+        assert "Acesso restrito ao administrador." in texto
+        assert "Opção inválida" not in texto
+
+    def test_admin_ve_as_tarefas_de_todos_com_o_dono(self, preparado):
+        conta_comum()
+        rodar("ana@x.com", *cadastro(titulo="Da Ana"), "3", senhas=("senha123",))
+        rodar(ADMIN, *cadastro(titulo="Do administrador"), "3")
+        _, texto = rodar(ADMIN, "4", "3")
+        assert "#1  Da Ana" in texto and "Dono:         Ana" in texto
+        assert "#2  Do administrador" in texto and "Dono:         Administrador" in texto
+        assert "2 tarefas." in texto
+
+    def test_na_opcao_2_o_admin_continua_vendo_so_as_proprias(self, preparado):
+        """Passo 2.2 - fora da visao administrativa, o admin e um usuario como os outros."""
+        conta_comum()
+        rodar("ana@x.com", *cadastro(titulo="Da Ana"), "3", senhas=("senha123",))
+        _, texto = rodar(ADMIN, "2", "3")
+        assert "Da Ana" not in texto
+        assert "Nenhuma tarefa cadastrada no momento." in texto
+        assert "Como administrador, as tarefas de todos os usuários ficam na opção 4." in texto
+
+    def test_usuario_comum_sem_tarefas_nao_recebe_a_dica_do_admin(self, preparado):
+        conta_comum()
+        _, texto = rodar("ana@x.com", "2", "3", senhas=("senha123",))
+        assert "Como administrador" not in texto
+
+    def test_visao_administrativa_vazia(self, preparado):
+        _, texto = rodar(ADMIN, "4", "3")
         assert "Nenhuma tarefa cadastrada no momento." in texto
 
 
