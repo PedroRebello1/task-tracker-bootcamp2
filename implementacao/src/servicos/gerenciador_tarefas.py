@@ -8,7 +8,6 @@ Cada operacao de escrita le o arquivo UMA vez, trabalha sobre essa lista e
 regrava. Ler duas vezes (uma para achar a tarefa, outra para alterar) alem de
 desperdicar disco abre uma janela em que as duas leituras podem discordar.
 """
-import unicodedata
 from datetime import timedelta
 
 from src import configuracao
@@ -67,8 +66,8 @@ class GerenciadorTarefas:
 
         # 2.4 - busca por palavra no titulo, ignorando maiusculas e acentos
         if busca and busca.strip():
-            alvo = _normalizar(busca)
-            tarefas = [t for t in tarefas if alvo in _normalizar(t.titulo)]
+            alvo = validacoes.normalizar_texto(busca)
+            tarefas = [t for t in tarefas if alvo in validacoes.normalizar_texto(t.titulo)]
 
         # 2.5 - data, depois prioridade, depois identificador
         tarefas.sort(key=lambda t: (t.data_prevista, t.peso_prioridade, t.id))
@@ -112,6 +111,7 @@ class GerenciadorTarefas:
     def criar(self, usuario, titulo, descricao, texto_data, prioridade, categoria,
               hoje=None, momento=None):
         """Passo 3. Devolve (tarefa, erros); a tarefa e None quando ha erro."""
+        prioridade = validacoes.normalizar_prioridade(prioridade)
         categoria = validacoes.normalizar_categoria(categoria)
         data_prevista, erro_data = validacoes.converter_data(texto_data)
         erros = validacoes.validar_dados_da_tarefa(
@@ -150,6 +150,7 @@ class GerenciadorTarefas:
         if erro:
             raise ErroDeRegra(erro)
 
+        prioridade = validacoes.normalizar_prioridade(prioridade)
         categoria = validacoes.normalizar_categoria(categoria)
         data_prevista, erro_data = validacoes.converter_data(texto_data)
         erros = validacoes.validar_dados_da_tarefa(
@@ -220,9 +221,3 @@ class GerenciadorTarefas:
             if erro:
                 avisos.append(erro)
         return avisos
-
-
-def _normalizar(texto):
-    """Minusculas e sem acentos, para a busca do Passo 2.4."""
-    sem_acento = unicodedata.normalize("NFKD", texto or "")
-    return "".join(c for c in sem_acento if not unicodedata.combining(c)).lower()

@@ -8,6 +8,7 @@ A RN06 (toda exclusao exige confirmacao) nao aparece como funcao porque não e
 uma validação de dado: ela e garantida pelo fluxo de duas etapas da rota de
 exclusão, que so remove a tarefa quando recebe a confirmacao explicita.
 """
+import unicodedata
 from datetime import date
 
 from src import configuracao
@@ -73,11 +74,21 @@ def validar_data_prevista(data_prevista, data_anterior=None, hoje=None):
 
 
 # RN03
+def normalizar_prioridade(prioridade):
+    """Aceita a prioridade digitada sem acento ou com outra caixa.
+
+    O enunciado da Etapa 2 pede que "Media" valha como "Média". 'media',
+    'MÉDIA' e ' alta ' viram o valor da lista fechada; qualquer outra coisa
+    volta como veio, e a validar_prioridade a recusa.
+    """
+    return _valor_da_lista(prioridade, configuracao.PRIORIDADES)
+
+
 def normalizar_categoria(categoria):
-    """A categoria é opcional. Vazia vira o padrao."""
+    """A categoria é opcional. Vazia vira o padrao; 'saude' vira 'Saúde'."""
     if categoria is None or not str(categoria).strip():
         return configuracao.CATEGORIA_PADRAO
-    return str(categoria).strip()
+    return _valor_da_lista(categoria, configuracao.CATEGORIAS)
 
 
 def validar_prioridade(prioridade):
@@ -189,6 +200,27 @@ def validar_dados_da_tarefa(titulo, descricao, data_prevista, prioridade,
         validar_categoria(normalizar_categoria(categoria)),
     ]
     return [erro for erro in verificacoes if erro]
+
+
+def normalizar_texto(texto):
+    """Minusculas e sem acentos: 'Média' -> 'media'. Usado na busca e na RN03."""
+    sem_acento = unicodedata.normalize("NFKD", texto or "")
+    return "".join(c for c in sem_acento if not unicodedata.combining(c)).lower()
+
+
+def _valor_da_lista(texto, opcoes):
+    """O item de `opcoes` que bate com `texto`, ignorando caixa, acento e espacos.
+
+    Sem correspondencia, devolve o texto como veio (sem os espacos das pontas),
+    para que a validacao da lista fechada o recuse com a mensagem de sempre.
+    """
+    if texto is None:
+        return None
+    alvo = normalizar_texto(str(texto).strip())
+    for opcao in opcoes:
+        if normalizar_texto(opcao) == alvo:
+            return opcao
+    return str(texto).strip()
 
 
 def _ou(valores):
