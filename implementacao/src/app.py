@@ -5,7 +5,8 @@ para cada um, chama o servico correspondente e devolve a pagina montada.
 
 Executado diretamente (`python -m src.app`), pergunta primeiro se
 quer usar o terminal ou o navegador. A interface de terminal mora em
-src/cli/ e usa exatamente os mesmos servicos e arquivos de dados.
+src/cli/ e usa exatamente os mesmos servicos e arquivos de dados. O menu
+numerado (src/main.py) e a terceira interface, aberta com `--menu`.
 """
 import argparse
 import os
@@ -566,7 +567,7 @@ def _modo_de_execucao(argumentos, interativo=None):
     Sem argumento e com um terminal interativo, o programa abre a tela de
     escolha entre o terminal e o web app. Sem terminal (Docker, redirecionamento,
     CI) nao há a quem perguntar: sobe o web app, que é o comportamento planejado.
-    `--web` e `--cli` pulam a pergunta.
+    `--web`, `--cli` e `--menu` pulam a pergunta.
     """
     analisador = argparse.ArgumentParser(
         prog="python -m src.app",
@@ -575,11 +576,15 @@ def _modo_de_execucao(argumentos, interativo=None):
     grupo.add_argument("--web", action="store_true", help="sobe o web app direto, sem perguntar")
     grupo.add_argument("--cli", action="store_true",
                        help="entra na interface de terminal direto, sem perguntar")
+    grupo.add_argument("--menu", action="store_true",
+                       help="abre o menu numerado (o mesmo de python -m src.main)")
     opcoes = analisador.parse_args(argumentos)
     if opcoes.web:
         return "web"
     if opcoes.cli:
         return "cli"
+    if opcoes.menu:
+        return "menu"
     # O recarregador do modo de depuracao do Flask relança este arquivo num
     # processo filho: lá a escolha já foi feita, e perguntar de novo travaria.
     if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
@@ -611,6 +616,10 @@ if __name__ == "__main__":
         print("\n  ERRO: %s\n" % erro)
         sys.exit(1)
     avisos = _avisos_de_inicializacao(novo_admin)
+
+    if modo == "menu":
+        from src.main import MenuNumerado
+        sys.exit(MenuNumerado(usuarios, tarefas).executar())
 
     abrir_navegador = False
     if modo != "web":

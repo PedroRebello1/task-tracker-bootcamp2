@@ -535,10 +535,13 @@ class TestModoDeExecucao:
     def test_opcoes_pulam_a_pergunta(self):
         assert modulo._modo_de_execucao(["--web"], interativo=True) == "web"
         assert modulo._modo_de_execucao(["--cli"], interativo=False) == "cli"
+        assert modulo._modo_de_execucao(["--menu"], interativo=True) == "menu"
 
     def test_opcoes_sao_excludentes(self):
         with pytest.raises(SystemExit):
             modulo._modo_de_execucao(["--web", "--cli"])
+        with pytest.raises(SystemExit):
+            modulo._modo_de_execucao(["--menu", "--web"])
 
     def test_processo_filho_do_recarregador_nao_pergunta(self, monkeypatch):
         monkeypatch.setenv("WERKZEUG_RUN_MAIN", "true")
