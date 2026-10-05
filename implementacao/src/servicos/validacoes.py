@@ -43,6 +43,21 @@ def validar_descricao(descricao):
 
 
 # RN02
+def data_para_iso(texto):
+    """'DD/MM/AAAA' -> 'AAAA-MM-DD', o formato que `converter_data` espera.
+
+    E assim que as interfaces de terminal recebem a data digitada. Mora aqui, e
+    nao em src/cli/, para que o menu numerado nao dependa do Textual. Texto em
+    outro formato volta como veio, e a converter_data o recusa.
+    """
+    texto = (texto or "").strip()
+    partes = texto.split("/")
+    if [len(parte) for parte in partes] == [2, 2, 4] and all(parte.isdigit() for parte in partes):
+        dia, mes, ano = partes
+        return "%s-%s-%s" % (ano, mes, dia)
+    return texto
+
+
 def converter_data(texto):
     """Converte 'AAAA-MM-DD' em date. Devolve (data, erro)."""
     if not texto or not texto.strip():

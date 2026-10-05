@@ -12,20 +12,9 @@ from textual.widgets import Button, Footer, Input, Label, MaskedInput, Select, S
 from src import configuracao
 from src.cli import formato
 from src.servicos import relogio
-from src.servicos.validacoes import ErroDeRegra
+from src.servicos.validacoes import ErroDeRegra, data_para_iso
 
 MASCARA_DATA = "00/00/0000"
-
-
-def data_para_iso(texto):
-    """'DD/MM/AAAA' -> 'AAAA-MM-DD', o formato que `converter_data` espera.
-    """
-    texto = (texto or "").strip()
-    partes = texto.split("/")
-    if [len(parte) for parte in partes] == [2, 2, 4] and all(parte.isdigit() for parte in partes):
-        dia, mes, ano = partes
-        return "%s-%s-%s" % (ano, mes, dia)
-    return texto
 
 
 class TelaFormularioTarefa(Screen[bool]):

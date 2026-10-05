@@ -18,10 +18,11 @@ from src.cli.aplicacao import AplicacaoTerminal
 from src.cli.boas_vindas import TelaBoasVindas
 from src.cli.conta import TelaLogin
 from src.cli.dialogos import ConfirmarExclusao, TarefaConcluida
-from src.cli.formulario import TelaFormularioTarefa, data_para_iso
+from src.cli.formulario import TelaFormularioTarefa
 from src.cli.painel import TelaPainel
 from src.cli.relatorio import TelaRelatorio
 from src.servicos import relogio
+from src.servicos.validacoes import data_para_iso
 
 TAMANHO = (120, 40)
 
