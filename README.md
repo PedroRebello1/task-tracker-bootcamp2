@@ -9,8 +9,8 @@ Sistema de gerenciamento de tarefas pessoais.
 | **Polo / Turma** | EAD — Campus Asa Norte / Turma A    |
 | **E-mail**       | pedro.rebello@sempreceub.com         |
 | **Disciplina**   | Bootcamp II                          |
-| **Vídeo (Etapa 2)** | *pendente*                        |
-| **Google Colab** | *pendente*                           |
+| **GitHub** | *[Repositório](https://github.com/PedroRebello1/task-tracker-bootcamp2)*                        |
+| **Google Colab** | *[Notebook](https://colab.research.google.com/drive/1FGGMAiIm8L8xownA5ow3uH-Q5f-dgwPF?usp=sharing)*                           |
 
 ---
 
@@ -45,7 +45,7 @@ Isso foi possível sem tocar em nenhuma regra de negócio porque a estrutura des
 Com as duas interfaces já construídas, ficaram claros dois requisitos da entrega da Etapa 2 que elas não atendiam:
 
 - **Menu numerado em loop contínuo.** O enunciado pede uma CLI clássica, com as opções `1. Cadastrar nova tarefa`, `2. Visualizar tarefas cadastradas` e `3. Sair da aplicação`, em que uma entrada inválida (título vazio ou prioridade fora da lista) gera mensagem de erro e repete a pergunta. O modo terminal é uma aplicação de tela cheia, com formulários e atalhos de teclado, e nele a prioridade é escolhida numa lista, então não há como digitá-la errado.
-- **Link do Google Colab.** O formulário de entrega pede, além do GitHub e do vídeo, um link do Colab, a plataforma oficial da disciplina. Nem a interface Textual, que precisa de um terminal real, nem o servidor Flask rodam dentro de uma célula do Colab.
+- **Link do Google Colab.** O formulário de entrega pede, além do GitHub e do vídeo, um link do Colab. Nem a interface Textual, que precisa de um terminal real, nem o servidor Flask rodam dentro de uma célula do Colab.
 
 A resposta foi a mesma da primeira vez: mais uma camada fina. O **menu numerado**, em `implementacao/src/main.py`, é feito só com `input()` e `print()`, confere cada campo assim que ele é digitado e repete a pergunta até a entrada ser válida. O **notebook do Colab** clona este repositório e executa esse mesmo arquivo. Junto com eles, a prioridade passou a aceitar "Media" sem acento, como pede o enunciado. Essa mudança vale para as três interfaces, porque a regra mora nos serviços e não nas telas.
 
@@ -161,7 +161,7 @@ Para o administrador, o menu ganha a opção `4. Visão administrativa`, com as 
 
 O notebook [`implementacao/TaskTracker_Colab.ipynb`](implementacao/TaskTracker_Colab.ipynb) roda o menu numerado sem instalar nada na máquina. Ele clona este repositório, instala as dependências, carrega os dados de exemplo e executa `src/main.py`; por último, roda os testes.
 
-**Link do Colab:** *pendente*
+**Link do Colab:** *[Notebook](https://colab.research.google.com/drive/1FGGMAiIm8L8xownA5ow3uH-Q5f-dgwPF?usp=sharing)*
 
 ### 4. Rodar os testes
 
