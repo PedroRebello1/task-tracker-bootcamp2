@@ -1,0 +1,12 @@
+#   docker compose run --rm tasktracker-app    menu numerado, interativo
+
+name: tasktracker
+
+services:
+  tasktracker-app:
+    build: .
+    stdin_open: true
+    # Aloca um terminal virtual, simulando o console.
+    tty: true
+    volumes:
+      - ./implementacao/dados:/app/dados
