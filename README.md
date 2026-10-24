@@ -115,7 +115,7 @@ Depois de cadastrar uma tarefa pelo comando 3, ela está em `implementacao/dados
 | Encerrar e remover o web app                            | `Ctrl+C`, depois `docker compose --profile web down`               |
 | Abrir o modo terminal (Textual)                         | `docker compose run --rm tasktracker-app python src/app.py --cli`  |
 | Listar os containers, rodando ou parados                | `docker ps -a`                                                     |
-| Ver a imagem e o tamanho (cerca de 150 MB)              | `docker image ls tasktracker`                                      |
+| Ver a imagem e o tamanho (cerca de 230 MB em disco)     | `docker image ls tasktracker`                                      |
 | Reconstruir depois de mudar o código                    | `docker build -t tasktracker .` e `docker compose build`           |
 
 O instalador de exemplos se recusa a sobrescrever dados que já existem; para substituí-los, acrescente `--forcar` (uma cópia `.bak` é guardada antes). O web app e o menu usam os mesmos arquivos: o que um cadastra, o outro enxerga.
@@ -138,7 +138,7 @@ O instalador de exemplos se recusa a sobrescrever dados que já existem; para su
 
 | Decisão                                 | Por quê                                                                                                                                                                                                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FROM python:3.11-slim`                 | Imagem oficial sobre um Debian enxuto: 43 MB para baixar, contra 391 MB da variante completa (tamanhos comprimidos do Docker Hub, amd64), que traz compiladores e bibliotecas que a aplicação não usa. A imagem final tem cerca de 150 MB. O 3.11 é a versão do enunciado, e os 336 testes passam nela dentro do container. |
+| `FROM python:3.11-slim`                 | Imagem oficial sobre um Debian enxuto: 43 MB para baixar, contra 391 MB da variante completa (tamanhos comprimidos do Docker Hub, amd64), que traz compiladores e bibliotecas que a aplicação não usa. A imagem final ocupa cerca de 230 MB em disco, ou 55 MB comprimidos. O 3.11 é a versão do enunciado, e os 336 testes passam nela dentro do container. |
 | `WORKDIR /app`                          | Pasta central de operações. O `configuracao.py` calcula a pasta de dados a partir do próprio arquivo, então dentro do container ela já é `/app/dados`, o mesmo caminho do volume, sem nenhuma configuração extra.                                          |
 | `ENV PYTHONUNBUFFERED=1`                | Cada `print()` sai na hora: as perguntas do menu aparecem antes de o cursor esperar a resposta, e os logs do web app chegam ao `docker compose logs` em tempo real.                                                                                          |
 | `requirements.txt` copiado antes do código | Cache de camadas: alterar o código refaz só as cópias, em segundos, e não a instalação das dependências.                                                                                                                                               |
