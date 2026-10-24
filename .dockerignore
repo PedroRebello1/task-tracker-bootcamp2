@@ -1,0 +1,19 @@
+# Ignora tudo e devolve só a implementacao/
+# qualquer arquivo de trabalho da raiz nunca chegam ao build.
+*
+!implementacao/
+
+# Dentro da implementacao/, fica de fora o que cada máquina gera para si:
+# ambientes virtuais, caches, variáveis locais, etc
+**/venv/
+**/.venv/
+**/env/
+**/__pycache__/
+**/*.py[cod]
+**/.pytest_cache/
+**/.env
+implementacao/dados/*
+!implementacao/dados/*.exemplo.json
+
+# O notebook roda no Google Colab, não no container.
+implementacao/*.ipynb
