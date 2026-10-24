@@ -27,7 +27,7 @@ Uma aplicação local em Python com **três interfaces sobre as mesmas regras e 
 
 - **Web app** (Flask): o programa sobe um servidor na própria máquina e o uso é pelo navegador, em `http://127.0.0.1:5000`.
 - **Modo terminal** (Textual): uma aplicação de tela cheia dentro do próprio terminal, com tabelas, formulários, diálogos e mouse.
-- **Menu numerado** (`input()` e `print()`): a CLI clássica pedida pelo enunciado da Etapa 2, com `1. Cadastrar`, `2. Visualizar` e `3. Sair`. É também a interface que roda no Google Colab.
+- **Menu numerado** (`input()` e `print()`): a CLI clássica pedida pelo enunciado da Etapa 2, com `1. Cadastrar`, `2. Visualizar` e `3. Sair`. Depois da listagem, o número de uma tarefa abre as ações dela: editar, concluir ou reabrir e excluir. É também a interface que roda no Google Colab.
 
 Ao iniciar, o sistema pergunta qual das duas primeiras usar; o menu numerado tem comando próprio. Cada pessoa faz login e tem uma área própria, onde só enxerga e altera as suas tarefas.
 
@@ -87,7 +87,7 @@ docker run -it --rm tasktracker
 docker compose run --rm tasktracker-app
 ```
 
-Os comandos 2 e 3 abrem o [menu numerado](#usando-o-menu-numerado) da Etapa 2. Entre com o administrador padrão, **`admin@tasktracker.local` / `admin123`** (a senha é digitada sem eco), ou digite `nova` no e-mail para criar uma conta. O menu se repete até a opção 3, e o administrador vê também a opção 4, com as tarefas de todos os usuários.
+Os comandos 2 e 3 abrem o [menu numerado](#usando-o-menu-numerado) da Etapa 2. Entre com o administrador padrão, **`admin@tasktracker.local` / `admin123`** (a senha é digitada sem eco), ou digite `nova` no e-mail para criar uma conta. O menu se repete até a opção 3, e o administrador vê também a opção 4, com as tarefas de todos os usuários. Depois de uma lista, o número de uma tarefa abre as ações dela: [editar, concluir, reabrir e excluir](#editar-concluir-reabrir-e-excluir).
 
 ```
 1. Cadastrar nova tarefa
@@ -110,7 +110,7 @@ Depois de cadastrar uma tarefa pelo comando 3, ela está em `implementacao/dados
 | Para                                                    | Comando                                                            |
 | ------------------------------------------------------- | ------------------------------------------------------------------ |
 | Carregar os dados de exemplo (12 tarefas de 2 usuários) | `docker compose run --rm tasktracker-app python -m src.exemplo`    |
-| Rodar os 291 testes dentro do container                 | `docker run --rm tasktracker python -m pytest`                     |
+| Rodar os 336 testes dentro do container                 | `docker run --rm tasktracker python -m pytest`                     |
 | Abrir o web app em http://localhost:5000                | `docker compose --profile web up tasktracker-web`                  |
 | Encerrar e remover o web app                            | `Ctrl+C`, depois `docker compose --profile web down`               |
 | Abrir o modo terminal (Textual)                         | `docker compose run --rm tasktracker-app python src/app.py --cli`  |
@@ -138,7 +138,7 @@ O instalador de exemplos se recusa a sobrescrever dados que já existem; para su
 
 | Decisão                                 | Por quê                                                                                                                                                                                                                                                  |
 | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `FROM python:3.11-slim`                 | Imagem oficial sobre um Debian enxuto: 43 MB para baixar, contra 391 MB da variante completa (tamanhos comprimidos do Docker Hub, amd64), que traz compiladores e bibliotecas que a aplicação não usa. A imagem final tem cerca de 150 MB. O 3.11 é a versão do enunciado, e os 291 testes passam nela dentro do container. |
+| `FROM python:3.11-slim`                 | Imagem oficial sobre um Debian enxuto: 43 MB para baixar, contra 391 MB da variante completa (tamanhos comprimidos do Docker Hub, amd64), que traz compiladores e bibliotecas que a aplicação não usa. A imagem final tem cerca de 150 MB. O 3.11 é a versão do enunciado, e os 336 testes passam nela dentro do container. |
 | `WORKDIR /app`                          | Pasta central de operações. O `configuracao.py` calcula a pasta de dados a partir do próprio arquivo, então dentro do container ela já é `/app/dados`, o mesmo caminho do volume, sem nenhuma configuração extra.                                          |
 | `ENV PYTHONUNBUFFERED=1`                | Cada `print()` sai na hora: as perguntas do menu aparecem antes de o cursor esperar a resposta, e os logs do web app chegam ao `docker compose logs` em tempo real.                                                                                          |
 | `requirements.txt` copiado antes do código | Cache de camadas: alterar o código refaz só as cópias, em segundos, e não a instalação das dependências.                                                                                                                                               |
@@ -256,9 +256,29 @@ No cadastro, cada campo é conferido assim que é digitado. Uma resposta inváli
 | Categoria   | Opcional, Enter vazio vale `Geral`; Estudo, Trabalho, Pessoal, Saúde ou Geral (RN03) |
 | Data limite | `DD/MM/AAAA`, de hoje em diante (RN02)                                                |
 
-A tarefa nasce com o status **Pendente**. A opção 2 lista todas as tarefas da conta, com todos os campos, ou avisa "Nenhuma tarefa cadastrada no momento." quando não há nenhuma. `Ctrl+C` também encerra, sem perder nada: cada cadastro já foi gravado no arquivo.
+A tarefa nasce com o status **Pendente**. A opção 2 lista todas as tarefas da conta, com todos os campos, ou avisa "Nenhuma tarefa cadastrada no momento." quando não há nenhuma. `Ctrl+C` também encerra, sem perder nada: cada alteração já foi gravada no arquivo.
 
 Para o administrador, o menu ganha a opção `4. Visão administrativa`, com as tarefas de todos os usuários e o dono de cada uma (Passo 9). As opções 1 a 3 continuam com os mesmos números para todos. Fora da opção 4, o administrador vê só as próprias tarefas, como no painel. Um usuário comum que digite 4 recebe "Acesso restrito ao administrador." (RN05).
+
+#### Editar, concluir, reabrir e excluir
+
+Depois de uma lista com tarefas, o menu pergunta o número de uma delas; Enter vazio volta ao menu principal. O número abre o menu da tarefa:
+
+```
+1. Editar
+2. Concluir        (ou Reabrir, se a tarefa já está concluída)
+3. Excluir
+0. Voltar ao menu principal
+```
+
+| Ação      | Como funciona                                                                                                                                                                                             |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Editar    | Pergunta campo a campo, com o valor atual entre colchetes: Enter mantém, e `-` apaga a descrição. As conferências são as do cadastro, e uma tarefa atrasada pode manter a própria data (RN02). Se a tarefa está concluída, o menu oferece reabri-la antes (RN04). |
+| Concluir  | Grava o status **Concluída** e o momento da conclusão, que nunca fica antes da criação (RN07).                                                                                                             |
+| Reabrir   | Volta a tarefa para **Pendente** e apaga a data de conclusão.                                                                                                                                              |
+| Excluir   | Mostra a tarefa e pede confirmação: só `s` (ou `sim`) exclui, e qualquer outra resposta cancela (RN06).                                                                                                    |
+
+Só são aceitos os números da lista exibida, então um usuário comum nunca alcança a tarefa de outra pessoa (RN05). Na opção 4, o administrador pode agir sobre a tarefa de qualquer usuário, como no painel web.
 
 ### Executar no Google Colab
 
@@ -272,7 +292,7 @@ O notebook [`implementacao/TaskTracker_Colab.ipynb`](implementacao/TaskTracker_C
 python -m pytest
 ```
 
-São **291 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas). Os mesmos testes rodam dentro do container com `docker run --rm tasktracker python -m pytest`.
+São **336 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas). Os mesmos testes rodam dentro do container com `docker run --rm tasktracker python -m pytest`.
 
 ---
 
@@ -300,6 +320,7 @@ A especificação da Etapa 1 foi entregue e não foi alterada. O que a implement
 - **Menu numerado** como terceira interface, e um **notebook do Google Colab** que o executa — exigidos pela entrega da Etapa 2; ver [Por que três interfaces](#por-que-três-interfaces).
 - **Prioridade digitada sem acento**: `Media` vale como `Média`, como pede o enunciado da Etapa 2. A Etapa 1 só previa seletores, sem digitação.
 - **Data limite no menu numerado**: o enunciado da Etapa 2 aceita formato livre, mas o menu segue a RN02 da Etapa 1 e exige uma data real em `DD/MM/AAAA`, de hoje em diante.
+- **Editar, concluir, reabrir e excluir no menu numerado**: o enunciado da Etapa 2 pede só cadastrar, visualizar e sair. As demais operações planejadas na Etapa 1 ficam depois da listagem, pelo número da tarefa, e as três opções mantêm os números do enunciado.
 - **Filtro por situação** (Pendentes, Concluídas, Atrasadas), ao lado do filtro de período: a pergunta que motivou o sistema é sobre o que está *pendente*.
 - **Data de conclusão visível** na listagem e nas confirmações, para que o histórico protegido pela RN04 sirva para alguma coisa.
 - **Fuso horário explícito** (`America/Sao_Paulo`): o sistema gira em torno de "hoje", e num servidor em UTC uma tarefa criada às 21h30 nasceria com a data do dia seguinte.
@@ -344,7 +365,7 @@ task-tracker-bootcamp2/
 │   ├── TaskTracker_Colab.ipynb          notebook do Google Colab que executa o menu numerado
 │   ├── src/
 │   │   ├── app.py                       ponto de entrada: pergunta terminal ou web, define as rotas
-│   │   ├── main.py                      menu numerado: cadastrar, visualizar e sair
+│   │   ├── main.py                      menu numerado: cadastrar, visualizar, editar, concluir, excluir e sair
 │   │   ├── configuracao.py              constantes, listas fechadas, limites, caminhos
 │   │   ├── exemplo.py                   instalador dos dados de exemplo
 │   │   ├── modelos/                     classes Tarefa e Usuario
@@ -427,7 +448,7 @@ A RN02 e a RN03 têm **barreira dupla**: o navegador impede o erro pelo próprio
 | `tests/test_relogio_e_exemplo.py`   | Fuso horário e o instalador dos dados de exemplo                                                                                       |
 | `tests/test_rotas.py`               | O que só existe no HTTP: RN06 em duas etapas, RN05 por URL, CSRF, páginas de erro, herança de filtros                                |
 | `tests/test_cli.py`                 | O modo terminal: tela de escolha, login e bloqueio, formulário, RN04, RN06, filtros, relatório, RN05 e as opções`--web`/`--cli`/`--menu` |
-| `tests/test_main.py`                | O menu numerado: loop e opção inválida, login e criação de conta, RN01, RN02 e RN03 com repetição da pergunta, lista vazia, todos os campos na listagem, RN05, visão administrativa (opção 4) e saída por `3`, `Ctrl+C` ou fim da entrada |
+| `tests/test_main.py`                | O menu numerado: loop e opção inválida, login e criação de conta, RN01, RN02 e RN03 com repetição da pergunta, lista vazia, todos os campos na listagem, RN05, visão administrativa (opção 4), o número da tarefa e o menu dela, edição (Enter mantém, RN04 com reabrir), conclusão e reabertura (RN07), exclusão com confirmação (RN06), o admin agindo sobre tarefas de outros usuários e saída por `3`, `Ctrl+C` ou fim da entrada |
 
 </details>
 
@@ -441,7 +462,7 @@ Caminhos relativos a `implementacao/`.
 | Caminho                                  | Responsabilidade                                                                                                  |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `src/app.py`                           | Ponto de entrada. Pergunta terminal ou web, cria o servidor e define os endereços. Coordena, não contém regra. |
-| `src/main.py`                          | O menu numerado, só com `input()` e `print()`, sobre os mesmos serviços: cadastrar, visualizar, sair e, para o admin, a visão administrativa. Sem regra de negócio. |
+| `src/main.py`                          | O menu numerado, só com `input()` e `print()`, sobre os mesmos serviços: cadastrar, visualizar, editar, concluir, reabrir, excluir, sair e, para o admin, a visão administrativa. Sem regra de negócio. |
 | `TaskTracker_Colab.ipynb`              | Notebook do Google Colab que clona o repositório, carrega os dados de exemplo e executa o menu numerado.         |
 | `src/cli/`                             | O modo terminal em Textual: uma tela por rota do web app, sobre os mesmos serviços. Sem regra de negócio.       |
 | `src/configuracao.py`                  | Caminhos, listas fechadas, limites, fuso e dados do administrador padrão.                                        |
