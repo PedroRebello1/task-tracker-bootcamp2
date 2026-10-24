@@ -565,8 +565,8 @@ def _modo_de_execucao(argumentos, interativo=None):
     """Decide entre "cli" e "web" a partir da linha de comando.
 
     Sem argumento e com um terminal interativo, o programa abre a tela de
-    escolha entre o terminal e o web app. Sem terminal (Docker, redirecionamento,
-    CI) nao há a quem perguntar: sobe o web app, que é o comportamento planejado.
+    escolha entre o terminal e o web app. Sem terminal (Docker sem -it, saida
+    redirecionada) nao há a quem perguntar: sobe o web app, que é o comportamento planejado.
     `--web`, `--cli` e `--menu` pulam a pergunta.
     """
     analisador = argparse.ArgumentParser(
