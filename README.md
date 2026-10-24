@@ -12,6 +12,8 @@ Sistema de gerenciamento de tarefas pessoais.
 | **GitHub** | *[Repositório](https://github.com/PedroRebello1/task-tracker-bootcamp2)*                        |
 | **Google Colab** | *[Notebook](https://colab.research.google.com/drive/1FGGMAiIm8L8xownA5ow3uH-Q5f-dgwPF?usp=sharing)*                           |
 
+> **Etapa Final (Docker):** os três comandos de avaliação — construir a imagem, rodar o container e rodar via orquestração — estão em [Como executar com Docker](#como-executar-com-docker-etapa-final).
+
 ---
 
 ## O problema
@@ -51,7 +53,104 @@ A resposta foi a mesma da primeira vez: mais uma camada fina. O **menu numerado*
 
 ---
 
-## Como executar
+## Como executar com Docker (Etapa Final)
+
+Com o Docker, o TaskTracker roda igual em qualquer máquina, sem instalar Python nem bibliotecas: tudo vai dentro da imagem. O único pré-requisito é o **Docker** aberto e em execução — Docker Desktop no Windows e no macOS, ou Docker Engine com o plugin Compose no Linux.
+
+Os comandos são digitados num terminal (PowerShell, Windows Terminal ou o terminal do VS Code) aberto na **raiz do repositório**, a pasta do `Dockerfile` e do `docker-compose.yml`:
+
+```
+git clone https://github.com/PedroRebello1/task-tracker-bootcamp2.git
+cd task-tracker-bootcamp2
+```
+
+> **Aos avaliadores:** os três comandos da Etapa Final, um por bloco, prontos para copiar.
+
+### 1. Como construir a imagem
+
+```
+docker build -t tasktracker .
+```
+
+### 2. Como rodar o container em modo isolado
+
+```
+docker run -it --rm tasktracker
+```
+
+### 3. Como rodar via orquestração (Recomendado)
+
+```
+docker compose run --rm tasktracker-app
+```
+
+Os comandos 2 e 3 abrem o [menu numerado](#usando-o-menu-numerado) da Etapa 2. Entre com o administrador padrão, **`admin@tasktracker.local` / `admin123`** (a senha é digitada sem eco), ou digite `nova` no e-mail para criar uma conta. O menu se repete até a opção 3, e o administrador vê também a opção 4, com as tarefas de todos os usuários.
+
+```
+1. Cadastrar nova tarefa
+2. Visualizar tarefas cadastradas
+3. Sair da aplicação
+```
+
+Os dois comandos rodam a mesma imagem; o que muda é quem abre o canal do teclado e onde os dados ficam:
+
+|             | 2. `docker run -it --rm tasktracker`                                   | 3. `docker compose run --rm tasktracker-app`                                                          |
+| ----------- | ---------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **Teclado** | `-i` mantém a entrada aberta e `-t` aloca um terminal, na linha de comando | `stdin_open: true` e `tty: true`, declarados no `docker-compose.yml`                                 |
+| **Imagem**  | a do comando 1                                                         | o compose constrói a dele na primeira vez, reaproveitando o cache do comando 1                         |
+| **Dados**   | ficam dentro do container e somem com ele ao sair (`--rm`)             | `implementacao/dados/` é montada como volume: as tarefas ficam no seu disco e voltam na próxima execução |
+
+Depois de cadastrar uma tarefa pelo comando 3, ela está em `implementacao/dados/tarefas.json`, o mesmo arquivo que a aplicação usa quando roda sem Docker.
+
+### Outros comandos
+
+| Para                                                    | Comando                                                            |
+| ------------------------------------------------------- | ------------------------------------------------------------------ |
+| Carregar os dados de exemplo (12 tarefas de 2 usuários) | `docker compose run --rm tasktracker-app python -m src.exemplo`    |
+| Rodar os 291 testes dentro do container                 | `docker run --rm tasktracker python -m pytest`                     |
+| Abrir o web app em http://localhost:5000                | `docker compose --profile web up tasktracker-web`                  |
+| Encerrar e remover o web app                            | `Ctrl+C`, depois `docker compose --profile web down`               |
+| Abrir o modo terminal (Textual)                         | `docker compose run --rm tasktracker-app python src/app.py --cli`  |
+| Listar os containers, rodando ou parados                | `docker ps -a`                                                     |
+| Ver a imagem e o tamanho (cerca de 150 MB)              | `docker image ls tasktracker`                                      |
+| Reconstruir depois de mudar o código                    | `docker build -t tasktracker .` e `docker compose build`           |
+
+O instalador de exemplos se recusa a sobrescrever dados que já existem; para substituí-los, acrescente `--forcar` (uma cópia `.bak` é guardada antes). O web app e o menu usam os mesmos arquivos: o que um cadastra, o outro enxerga.
+
+### Problemas comuns
+
+| Sintoma                                                         | Causa e solução                                                                                                                                         |
+| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error during connect` ou `Cannot connect to the Docker daemon` | O Docker Desktop está fechado. Abra-o e espere aparecer *Engine running*.                                                                                |
+| `the input device is not a TTY`                                 | O terminal não é interativo, o que é comum no Git Bash. Use o PowerShell, ou ponha `winpty` antes do comando no Git Bash.                                |
+| Acentos trocados ao digitar                                     | Digite sem acento: `media`, `saude` e `estudo` são aceitos.                                                                                              |
+| `port is already allocated` no web app                          | A porta 5000 está ocupada (no macOS, pelo AirPlay). Troque `127.0.0.1:5000:5000` por `127.0.0.1:5001:5000` no `docker-compose.yml` e abra http://localhost:5001. |
+| Mudei o código e o container não mudou                          | A imagem é um retrato do código no momento do build: rode o build de novo.                                                                               |
+
+<details>
+<summary><b>Decisões técnicas da conteinerização</b></summary>
+
+<br>
+
+| Decisão                                 | Por quê                                                                                                                                                                                                                                                  |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FROM python:3.11-slim`                 | Imagem oficial sobre um Debian enxuto: 43 MB para baixar, contra 391 MB da variante completa (tamanhos comprimidos do Docker Hub, amd64), que traz compiladores e bibliotecas que a aplicação não usa. A imagem final tem cerca de 150 MB. O 3.11 é a versão do enunciado, e os 291 testes passam nela dentro do container. |
+| `WORKDIR /app`                          | Pasta central de operações. O `configuracao.py` calcula a pasta de dados a partir do próprio arquivo, então dentro do container ela já é `/app/dados`, o mesmo caminho do volume, sem nenhuma configuração extra.                                          |
+| `ENV PYTHONUNBUFFERED=1`                | Cada `print()` sai na hora: as perguntas do menu aparecem antes de o cursor esperar a resposta, e os logs do web app chegam ao `docker compose logs` em tempo real.                                                                                          |
+| `requirements.txt` copiado antes do código | Cache de camadas: alterar o código refaz só as cópias, em segundos, e não a instalação das dependências.                                                                                                                                               |
+| `.dockerignore` como lista de permissão | Ignora tudo e devolve só `implementacao/`; dentro dela, tira venv, caches e os JSON com dados reais. O contexto do build fica em cerca de 300 kB, e nenhum dado pessoal ou senha vai parar na imagem.                                                       |
+| `CMD ["python", "src/main.py"]`         | O enunciado pede a CLI interativa, então o gatilho é o menu numerado. O web app e o modo terminal continuam na mesma imagem, chamados por comando.                                                                                                          |
+| `stdin_open` e `tty`                    | O menu lê com `input()`, e a senha com `getpass`, que precisa de um terminal para desligar o eco. Sem os dois, o container não recebe o teclado.                                                                                                           |
+| `implementacao/dados/` como volume      | Previsto desde a Etapa 1: os JSON ficam fora da imagem, que é imutável, e sobrevivem ao `--rm`. A gravação atômica (`os.replace`) funciona porque a pasta inteira é montada, e não arquivo por arquivo.                                                     |
+| Container como root                     | Garante a escrita na pasta montada em qualquer máquina: num Linux, um usuário com outro UID dentro do container poderia não ter permissão nela. O serviço do menu não abre nenhuma porta.                                                                   |
+| Fuso `America/Sao_Paulo`                | O container nasce em UTC, mas o sistema calcula "hoje" no fuso configurado, com o pacote `tzdata` do `requirements.txt`: uma tarefa criada às 22h não nasce com a data de amanhã.                                                                           |
+| Perfil `web`                            | `TASKTRACKER_HOST=0.0.0.0` deixa o Flask aceitar conexões vindas de fora do container; a porta é publicada só em `127.0.0.1`, para a própria máquina; e `init: true` põe o tini como PID 1, para o servidor encerrar na hora com `Ctrl+C`.                    |
+
+</details>
+
+---
+
+## Como executar sem Docker (Python local)
 
 **Pré-requisito:** Python 3.12 ou mais recente.
 
