@@ -1,6 +1,6 @@
-#   docker compose run --rm tasktracker-app    menu numerado, interativo
+#   docker compose run --rm tasktracker-app               menu numerado, interativo
 
-#   docker compose --profile web up            web app em http://localhost:5000
+#   docker compose --profile web up tasktracker-web       web app em http://localhost:5000
 
 name: tasktracker
 
