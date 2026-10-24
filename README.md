@@ -39,6 +39,8 @@ Ao iniciar, o sistema pergunta qual das duas primeiras usar; o menu numerado tem
 - **Relatório resumido** — total, concluídas, pendentes, atrasadas, percentual de conclusão e distribuições por prioridade e categoria
 - **Visão administrativa** — perfil `admin`, que enxerga as tarefas de todos os usuários
 
+Na Etapa Final, a aplicação foi empacotada numa **imagem Docker**: qualquer máquina com Docker roda o sistema com um comando, sem instalar Python ([Como executar com Docker](#como-executar-com-docker-etapa-final)).
+
 ### Por que três interfaces
 
 A Etapa 1 planejou uma aplicação **100% web**: servidor Flask local e acesso pelo navegador. Na webaula 3, o enunciado da Etapa 2 apresentou a construção da aplicação como uma **CLI** — interface de linha de comando, executada no terminal. Em vez de abandonar o plano original ou reescrever o sistema, o plano foi ampliado: a aplicação ganhou uma segunda interface, de terminal, ao lado da web.
@@ -153,7 +155,7 @@ O instalador de exemplos se recusa a sobrescrever dados que já existem; para su
 
 ## Como executar sem Docker (Python local)
 
-**Pré-requisito:** Python 3.12 ou mais recente.
+**Pré-requisito:** Python 3.11 ou mais recente, a mesma versão da imagem Docker.
 
 ### 1. Instalar
 
@@ -269,7 +271,7 @@ O notebook [`implementacao/TaskTracker_Colab.ipynb`](implementacao/TaskTracker_C
 python -m pytest
 ```
 
-São **290 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas).
+São **291 testes**, todos passando: as regras de negócio isoladas, as operações sobre tarefas, a autenticação, o relatório, as rotas do web app, o modo terminal (dirigido por teclas e cliques simulados, sem abrir terminal) e o menu numerado (dirigido por respostas digitadas simuladas). Os mesmos testes rodam dentro do container com `docker run --rm tasktracker python -m pytest`.
 
 ---
 
@@ -305,16 +307,18 @@ A especificação da Etapa 1 foi entregue e não foi alterada. O que a implement
 - **Lista de tarefas no relatório**, ao lado das distribuições.
 - **Tema claro/escuro**, com a escolha gravada na conta.
 - **Licença GNU GPL v3.0**, e não a MIT citada no Mapeamento Arquitetural da Etapa 1.
+- **Arquivos do Docker na raiz**, e não numa pasta `docker/`: o enunciado da Etapa Final exige o `Dockerfile` e o `docker-compose.yml` na raiz, onde `docker build .` e `docker compose` os encontram sem parâmetros extras. A pasta `docker/`, reservada desde a Etapa 1, foi removida.
+- **A imagem abre o menu numerado**, e não o web app: o enunciado final pede a CLI interativa no terminal. O web app planejado na Etapa 1 continua disponível no container, pelo perfil `web` do compose.
 
 ---
 
 ## Etapas do projeto
 
-| Etapa                                    | Pasta              | Situação       |
-| ---------------------------------------- | ------------------ | ---------------- |
-| **1 — Planejamento lógico**      | `especificacao/` | ✅ Entregue      |
-| **2 — Implementação em Python** | `implementacao/` | 🟡 Em andamento  |
-| **3 — Empacotamento em Docker**   | `docker/`        | ⬜ Não iniciada |
+| Etapa                                    | Onde                                                    | Situação       |
+| ---------------------------------------- | ------------------------------------------------------- | ---------------- |
+| **1 — Planejamento lógico**      | `especificacao/`                                        | ✅ Entregue      |
+| **2 — Implementação em Python** | `implementacao/`                                        | ✅ Entregue      |
+| **3 — Empacotamento em Docker**   | raiz: `Dockerfile`, `docker-compose.yml`, `.dockerignore` | ✅ Concluída     |
 
 ### Estrutura do repositório
 
@@ -323,6 +327,10 @@ task-tracker-bootcamp2/
 ├── README.md
 ├── LICENSE
 ├── .gitignore
+│
+├── Dockerfile                           ← ETAPA 3: a imagem (python:3.11-slim + menu numerado)
+├── docker-compose.yml                   ← ETAPA 3: terminal interativo, volume de dados e perfil web
+├── .dockerignore                        ← ETAPA 3: o que fica fora do build
 │
 ├── especificacao/                       ← ETAPA 1
 │   ├── Planejamento Lógico TaskTracker - Pedro Rebello Borges de Barros.pdf
@@ -344,34 +352,36 @@ task-tracker-bootcamp2/
 │   │   ├── templates/                   telas do web app (Jinja2)
 │   │   ├── estaticos/                   estilo.css
 │   │   └── cli/                         telas do modo terminal (Textual)
-│   ├── dados/                           persistência em JSON (só os *.exemplo.json vão para o Git)
+│   ├── dados/                           persistência em JSON (só os *.exemplo.json vão para o Git); volume do Docker
 │   └── tests/                           testes automatizados com pytest
-│
-└── docker/                              ← ETAPA 3 (a construir; por ora só o .gitkeep)
 ```
 
 O `src/` é dividido por **responsabilidade**, não por tipo de arquivo. As regras de negócio ficam em `servicos/` e nunca dentro das telas — é isso que permite testá-las sem abrir o navegador, e é o que permitiu acrescentar o modo terminal e o menu numerado sem reescrever nenhuma regra.
 
-### Correspondência com a árvore do enunciado da Etapa 2
+### Correspondência com as árvores dos enunciados
 
-O enunciado da Etapa 2 mostra uma árvore genérica. Este repositório segue a árvore planejada na própria Etapa 1, e cada item do enunciado tem um equivalente direto:
+Os enunciados da Etapa 2 e da Etapa Final mostram uma árvore genérica. Este repositório segue a árvore planejada na própria Etapa 1, e cada item dos enunciados tem um equivalente direto:
 
-| Enunciado da Etapa 2           | Neste repositório                                                                                                          |
-| ------------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| `README.md`                    | `README.md`                                                                                                                |
-| `.gitignore`                   | `.gitignore`                                                                                                               |
-| `docs/planejamento_logico.pdf` | `especificacao/Planejamento Lógico TaskTracker - Pedro Rebello Borges de Barros.pdf`, com o Mapeamento Arquitetural ao lado |
-| `src/main.py`                  | `implementacao/src/main.py`                                                                                                |
+| Enunciados (Etapa 2 e Etapa Final) | Neste repositório                                                                                                          |
+| ---------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| `README.md`                        | `README.md`                                                                                                                |
+| `.gitignore`                       | `.gitignore`                                                                                                               |
+| `docs/planejamento_logico.pdf`     | `especificacao/Planejamento Lógico TaskTracker - Pedro Rebello Borges de Barros.pdf`, com o Mapeamento Arquitetural ao lado |
+| `src/main.py`                      | `implementacao/src/main.py`                                                                                                |
+| `Dockerfile`                       | `Dockerfile`, na raiz                                                                                                      |
+| `docker-compose.yml`               | `docker-compose.yml`, na raiz                                                                                              |
 
 ## Stack
 
-- **Python 3.12+** (desenvolvido e testado em 3.14)
+- **Python 3.11+** (desenvolvido em 3.14; testado também em 3.11, a versão da imagem Docker)
+- **Docker** — imagem `python:3.11-slim`, com o menu numerado como ponto de entrada
+- **Docker Compose** — orquestra o terminal interativo, o volume de dados e o perfil web
 - **Flask 3.x** — servidor web; traz Jinja2 (templates) e Werkzeug (hash das senhas)
 - **Textual 8.x** — interface de terminal; traz o Rich
 - **tzdata** — base de fusos horários, que o Python não embute no Windows
 - **pytest 8.x** — testes automatizados
 - **Google Colab** — onde o menu numerado roda sem instalar nada na máquina
-- **Persistência em JSON** — legível a olho nu, nativo do Python e adequado como volume do Docker na Etapa 3
+- **Persistência em JSON** — legível a olho nu, nativo do Python e montado como volume no Docker
 
 ---
 
@@ -470,7 +480,7 @@ Cada tela do terminal chama os mesmos serviços que a rota correspondente do Fla
 
 Uma diferença de forma, não de regra: no navegador a data vem de um calendário, que entrega `AAAA-MM-DD` ao servidor; no terminal ela é digitada como `DD/MM/AAAA`, e a camada CLI apenas reordena o texto para o mesmo `AAAA-MM-DD` antes de entregá-lo a `converter_data`. A validação (RN02) continua toda no serviço.
 
-Sem um terminal interativo — dentro do Docker, com a saída redirecionada, em CI — não há a quem perguntar, e `python -m src.app` sobe o web app direto. É isso que mantém a Etapa 3 funcionando sem mudança.
+Sem um terminal interativo — com a saída redirecionada — não há a quem perguntar, e `python -m src.app` sobe o web app direto. No Docker, a imagem abre o menu numerado, e o web app sobe pelo perfil `web` do compose, que chama `src/app.py --web`.
 
 </details>
 
@@ -501,20 +511,20 @@ Nenhuma é necessária para rodar localmente; os padrões servem.
 
 | Variável                     | Padrão                     | Para quê                                   |
 | ----------------------------- | --------------------------- | ------------------------------------------- |
-| `TASKTRACKER_HOST`          | `127.0.0.1`               | Endereço de escuta (no Docker,`0.0.0.0`) |
+| `TASKTRACKER_HOST`          | `127.0.0.1` (na imagem Docker, `0.0.0.0`) | Endereço de escuta do web app |
 | `TASKTRACKER_PORTA`         | `5000`                    | Porta do servidor                           |
 | `TASKTRACKER_DEBUG`         | `0`                       | `1` liga o modo de depuração            |
 | `TASKTRACKER_CHAVE_SECRETA` | sorteada a cada início     | Assina o cookie de sessão                  |
 | `TASKTRACKER_COOKIE_SEGURO` | `0`                       | `1` quando servir por HTTPS               |
 | `TASKTRACKER_HORAS_SESSAO`  | `12`                      | Validade da sessão                         |
 | `TASKTRACKER_FUSO`          | `America/Sao_Paulo`       | Fuso usado por "hoje"                       |
-| `TASKTRACKER_PASTA_DADOS`   | `implementacao/dados`     | Onde ficam os arquivos JSON                 |
+| `TASKTRACKER_PASTA_DADOS`   | `implementacao/dados` (no container, `/app/dados`) | Onde ficam os arquivos JSON |
 | `TASKTRACKER_ADMIN_LOGIN`   | `admin@tasktracker.local` | Login do administrador inicial              |
 | `TASKTRACKER_ADMIN_SENHA`   | `admin123`                | Senha do administrador inicial              |
 
 `TASKTRACKER_ADMIN_LOGIN` e `TASKTRACKER_ADMIN_SENHA` só têm efeito **antes** da primeira execução: depois que existe um administrador em `usuarios.json`, ele não é recriado.
 
-A preparação dos dados roda na **primeira requisição**, e não apenas no `python -m src.app`. Isso mantém o comportamento correto quando a aplicação sobe por `flask run` ou por um servidor WSGI, que é o cenário da Etapa 3.
+A preparação dos dados roda na **primeira requisição**, e não apenas no `python -m src.app`. Isso mantém o comportamento correto quando a aplicação sobe por `flask run` ou por um servidor WSGI.
 
 </details>
 
