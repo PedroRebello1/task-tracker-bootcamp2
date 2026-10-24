@@ -5,6 +5,9 @@ opcoes cadastrar, visualizar e sair. É tambem a interface que roda no Google
 Colab, onde nem o Textual (que precisa de um terminal real) nem o Flask (que
 precisa de um navegador apontado para ele) funcionam.
 
+As tres opcoes ficam como o enunciado pede. Editar, concluir, reabrir e excluir
+moram depois da listagem: escolhido o numero de uma tarefa, abre o menu dela.
+
 Como src/cli/ e o app.py, esta camada nao tem regra de negocio: os dados passam
 pelos mesmos GerenciadorUsuarios e GerenciadorTarefas e sao gravados nos mesmos
 arquivos JSON.
@@ -41,6 +44,12 @@ OPCAO_ADMIN = ("4", "Visão administrativa (tarefas de todos os usuários)")
 
 # Palavra que, digitada no lugar do e-mail, abre o cadastro de conta.
 CRIAR_CONTA = "nova"
+
+# Na edicao, digitada no lugar da descricao, apaga a que existia (Enter mantem).
+APAGAR = "-"
+
+# Respostas que confirmam uma pergunta de sim ou nao. Qualquer outra recusa.
+SIM = ("s", "sim")
 
 
 class MenuNumerado:
@@ -94,6 +103,10 @@ class MenuNumerado:
         self.mostrar(LINHA)
         self.mostrar(titulo)
         self.mostrar(LINHA)
+
+    def confirmar(self, rotulo):
+        """Pergunta de sim ou nao. So "s" ou "sim" confirmam."""
+        return self.perguntar(rotulo).strip().lower() in SIM
 
     # Passo 1
     def entrar(self):
@@ -177,10 +190,17 @@ class MenuNumerado:
             return
         self.mostrar("Tarefa criada com sucesso. (#%d, status %s)" % (tarefa.id, tarefa.status))
 
-    def ler_campo(self, rotulo, conferir):
-        """Repete a pergunta ate `conferir` aceitar o que foi digitado."""
+    def ler_campo(self, rotulo, conferir, atual=None):
+        """Repete a pergunta ate `conferir` aceitar o que foi digitado.
+
+        Com `atual`, Enter vazio mantem esse valor sem passar pela conferencia:
+        e assim que a edicao deixa um campo como estava.
+        """
         while True:
-            valor, erro = conferir(self.perguntar(rotulo))
+            texto = self.perguntar(rotulo)
+            if atual is not None and not texto.strip():
+                return atual
+            valor, erro = conferir(texto)
             if erro is None:
                 return valor
             self.mostrar(erro)
@@ -200,6 +220,7 @@ class MenuNumerado:
             # Passo 2.2 - mesmo o admin so ve as proprias tarefas fora da visao administrativa.
             self.mostrar("Como administrador, as tarefas de todos os usuários ficam na opção %s."
                          % OPCAO_ADMIN[0])
+        self.gerenciar(lista)
 
     # Passo 9
     def visao_administrativa(self):
@@ -215,6 +236,128 @@ class MenuNumerado:
         lista = self.tarefas.listar(self.usuario, periodo="todas", visao_admin=True)
         self.cabecalho("Visão administrativa · tarefas de todos os usuários")
         self.mostrar_lista(lista, donos=self.usuarios.nomes_por_id())
+        # RN05 - o admin pode agir sobre a tarefa de qualquer usuario, como na web.
+        self.gerenciar(lista)
+
+    # Passos 4 a 6 - a partir da listagem
+    def gerenciar(self, lista):
+        """Depois da lista, o numero de uma tarefa abre o menu dela. Enter volta."""
+        if not lista:
+            return
+        self.mostrar("Para editar, concluir, reabrir ou excluir, digite o número da tarefa.")
+        tarefa = self.escolher_tarefa(lista)
+        if tarefa is not None:
+            self.menu_da_tarefa(tarefa)
+
+    def escolher_tarefa(self, lista):
+        """So aceita um numero da lista exibida; o servico confere a posse de novo (RN05)."""
+        por_id = {tarefa.id: tarefa for tarefa in lista}
+        while True:
+            texto = self.perguntar("Número da tarefa (Enter volta ao menu): ").strip()
+            if not texto:
+                return None
+            numero = texto.lstrip("#")
+            if numero.isdecimal() and int(numero) in por_id:
+                return por_id[int(numero)]
+            self.mostrar("Tarefa não encontrada na lista. Digite um dos números acima, como %d."
+                         % lista[0].id)
+
+    def menu_da_tarefa(self, tarefa):
+        """As acoes sobre uma tarefa. Concluida oferece Reabrir no lugar de Concluir.
+
+        A lista pode ter ficado velha (a web e o terminal gravam nos mesmos
+        arquivos): o servico confere tudo de novo, e o ErroDeRegra vira aviso.
+        """
+        acoes = (
+            ("1", "Editar", self.editar),
+            ("2", "Reabrir", self.reabrir) if tarefa.concluida else ("2", "Concluir", self.concluir),
+            ("3", "Excluir", self.excluir),
+            ("0", "Voltar ao menu principal", None),
+        )
+        self.cabecalho("Tarefa #%d · %s" % (tarefa.id, tarefa.titulo))
+        self.mostrar("Status: %s" % tarefa.status)
+        self.mostrar()
+        for numero, descricao, _ in acoes:
+            self.mostrar("%s. %s" % (numero, descricao))
+        self.mostrar()
+        por_numero = {numero: acao for numero, _, acao in acoes}
+        while True:
+            # Enter vazio volta, como na pergunta do numero da tarefa.
+            opcao = self.perguntar("Escolha uma ação: ").strip() or "0"
+            if opcao in por_numero:
+                break
+            self.mostrar("Opção inválida. Escolha %s." % _ou(por_numero))
+        acao = por_numero[opcao]
+        if acao is None:
+            return
+        try:
+            acao(tarefa)
+        except ErroDeRegra as erro:
+            self.mostrar(str(erro))
+
+    # Passo 4
+    def editar(self, tarefa):
+        """Campo a campo, com o valor atual entre colchetes; Enter o mantem.
+
+        RN04 - concluida nao se edita. Como a web e o terminal, o menu oferece
+        reabrir e, aceito, segue para a edicao.
+        """
+        atual = self.tarefas.buscar_por_id(tarefa.id, self.usuario)
+        erro = validacoes.validar_edicao_permitida(atual)
+        if erro:
+            self.mostrar(erro)
+            if not self.confirmar("Reabrir a tarefa para editar? (s/n): "):
+                self.mostrar("A tarefa continua concluída.")
+                return
+            atual = self.tarefas.reabrir(self.usuario, atual.id)
+            self.mostrar("Tarefa reaberta.")
+
+        self.cabecalho("Editar tarefa #%d" % atual.id)
+        self.mostrar("Enter mantém o valor entre colchetes.")
+        titulo = self.ler_campo("Título [%s]: " % atual.titulo, conferir_titulo, atual.titulo)
+        rotulo_descricao = ("Descrição [%s] (%s apaga): " % (atual.descricao, APAGAR)
+                            if atual.descricao else "Descrição (opcional): ")
+        descricao = self.ler_campo(rotulo_descricao, conferir_descricao_editada, atual.descricao)
+        prioridade = self.ler_campo("Prioridade (%s) [%s]: "
+                                    % (_ou(configuracao.PRIORIDADES), atual.prioridade),
+                                    conferir_prioridade, atual.prioridade)
+        categoria = self.ler_campo("Categoria (%s) [%s]: "
+                                   % (_ou(configuracao.CATEGORIAS), atual.categoria),
+                                   conferir_categoria, atual.categoria)
+        # RN02 - a data que a tarefa ja tinha continua aceita, mesmo no passado.
+        data = self.ler_campo("Data limite (DD/MM/AAAA) [%s]: " % _data(atual.data_prevista),
+                              lambda texto: conferir_data(texto, anterior=atual.data_prevista),
+                              atual.data_prevista)
+
+        editada, erros = self.tarefas.editar(self.usuario, atual.id, titulo, descricao,
+                                             data.isoformat(), prioridade, categoria)
+        if erros:
+            for erro in erros:
+                self.mostrar(erro)
+            self.mostrar("A tarefa não foi alterada.")
+            return
+        self.mostrar("Tarefa atualizada com sucesso. (#%d)" % editada.id)
+
+    # Passo 5
+    def concluir(self, tarefa):
+        concluida = self.tarefas.concluir(self.usuario, tarefa.id)
+        self.mostrar("Tarefa concluída. (#%d, em %s)"
+                     % (concluida.id, _momento(concluida.data_conclusao)))
+
+    def reabrir(self, tarefa):
+        """Passo 5.7 - volta para Pendente e apaga a data de conclusao."""
+        reaberta = self.tarefas.reabrir(self.usuario, tarefa.id)
+        self.mostrar("Tarefa reaberta. (#%d, status %s)" % (reaberta.id, reaberta.status))
+
+    # Passo 6
+    def excluir(self, tarefa):
+        """RN06 - so um "s" explicito exclui. Qualquer outra resposta cancela."""
+        if not self.confirmar('Excluir a tarefa #%d "%s"? Esta ação não pode ser desfeita. (s/n): '
+                              % (tarefa.id, tarefa.titulo)):
+            self.mostrar("Exclusão cancelada. A tarefa continua cadastrada.")
+            return
+        excluida = self.tarefas.excluir(self.usuario, tarefa.id)
+        self.mostrar("Tarefa excluída. (#%d)" % excluida.id)
 
     def mostrar_lista(self, lista, donos=None):
         if not lista:
@@ -260,6 +403,13 @@ def conferir_descricao(texto):
     return texto.strip(), validacoes.validar_descricao(texto)
 
 
+def conferir_descricao_editada(texto):
+    """Na edicao, Enter mantem a descricao; por isso "-" e o jeito de apaga-la."""
+    if texto.strip() == APAGAR:
+        return "", None
+    return conferir_descricao(texto)
+
+
 def conferir_prioridade(texto):
     """RN03 - so Alta, Média (ou Media) e Baixa, sem diferenciar maiusculas."""
     prioridade = validacoes.normalizar_prioridade(texto)
@@ -272,8 +422,12 @@ def conferir_categoria(texto):
     return categoria, validacoes.validar_categoria(categoria)
 
 
-def conferir_data(texto, hoje=None):
-    """RN02 - DD/MM/AAAA, de hoje em diante."""
+def conferir_data(texto, hoje=None, anterior=None):
+    """RN02 - DD/MM/AAAA, de hoje em diante.
+
+    Na edicao, `anterior` e a data que a tarefa ja tinha: uma tarefa atrasada
+    pode manter a propria data, como no servico.
+    """
     iso = validacoes.data_para_iso(texto)
     # data_para_iso devolve sem mudar o que nao esta em DD/MM/AAAA. Sem esta
     # checagem, '2026-10-29' passaria direto pela converter_data.
@@ -281,7 +435,7 @@ def conferir_data(texto, hoje=None):
     if erro or iso == texto.strip():
         # A mensagem do servico fala em calendario, que aqui nao existe.
         return None, "Data inválida. Use o formato DD/MM/AAAA (dia/mês/ano)."
-    return data, validacoes.validar_data_prevista(data, hoje=hoje)
+    return data, validacoes.validar_data_prevista(data, data_anterior=anterior, hoje=hoje)
 
 
 # formatacao
