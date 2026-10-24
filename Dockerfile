@@ -21,4 +21,9 @@ COPY implementacao/src/ /app/src/
 COPY implementacao/dados/ /app/dados/
 COPY implementacao/tests/ /app/tests/
 
+# Modo web. Dentro do container, o Flask escuta em todas as 
+# interfaces para ser alcançado pela porta publicada.
+ENV TASKTRACKER_HOST=0.0.0.0
+EXPOSE 5000
+
 CMD ["python", "src/main.py"]

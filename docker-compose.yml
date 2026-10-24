@@ -1,5 +1,7 @@
 #   docker compose run --rm tasktracker-app    menu numerado, interativo
 
+#   docker compose --profile web up            web app em http://localhost:5000
+
 name: tasktracker
 
 services:
@@ -8,5 +10,20 @@ services:
     stdin_open: true
     # Aloca um terminal virtual, simulando o console.
     tty: true
+    volumes:
+      - ./implementacao/dados:/app/dados
+
+
+  tasktracker-web:
+    build: .
+    profiles: ["web"]
+    command: ["python", "src/app.py", "--web"]
+    # tini como PID 1: repassa o Ctrl+C e o "docker compose down" ao Flask,
+    # que encerra na hora em vez de esperar 10 s até ser derrubado.
+    init: true
+    # Publica a porta só para esta máquina, como o servidor local da Etapa 2.
+    ports:
+      - "127.0.0.1:5000:5000"
+    # Os mesmos arquivos do menu: o que um cadastra, o outro enxerga.
     volumes:
       - ./implementacao/dados:/app/dados
