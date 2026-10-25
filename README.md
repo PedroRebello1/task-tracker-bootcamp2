@@ -11,6 +11,9 @@ Sistema de gerenciamento de tarefas pessoais.
 | **Disciplina**   | Bootcamp II                          |
 | **GitHub**       | *[Repositório](https://github.com/PedroRebello1/task-tracker-bootcamp2)* |
 | **Google Colab** | *[Notebook](https://colab.research.google.com/drive/1FGGMAiIm8L8xownA5ow3uH-Q5f-dgwPF?usp=sharing)* |
+| **VIDEOS** |
+| **Vídeo (Etapa inicial)** | *https://youtu.be/x9qVEebd_qY*               |
+| **Vídeo (Etapa Intermediária)** | *https://youtu.be/Dl6y5Vn8aI8*               |
 | **Vídeo (Etapa Final)** | *link pendente*               |
 
 > **Etapa Final (Docker):** os três comandos de avaliação — construir a imagem, rodar o container e rodar via orquestração — estão em [Como executar com Docker](#como-executar-com-docker-etapa-final).
