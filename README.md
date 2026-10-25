@@ -14,7 +14,7 @@ Sistema de gerenciamento de tarefas pessoais.
 | **VIDEOS** |
 | **Vídeo (Etapa inicial)** | *https://youtu.be/x9qVEebd_qY*               |
 | **Vídeo (Etapa Intermediária)** | *https://youtu.be/Dl6y5Vn8aI8*               |
-| **Vídeo (Etapa Final)** | *link pendente*               |
+| **Vídeo (Etapa Final)** | *https://www.youtube.com/watch?v=AXXK02KdpIg*               |
 
 > **Etapa Final (Docker):** os três comandos de avaliação — construir a imagem, rodar o container e rodar via orquestração — estão em [Como executar com Docker](#como-executar-com-docker-etapa-final).
 
